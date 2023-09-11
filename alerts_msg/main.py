@@ -78,7 +78,9 @@ class AlertSmtp:
 
     # MSG =============================================================================================================
     @classmethod
-    def send(cls, subject: str, body: Any, _subtype="plain") -> Optional[bool]:
+    def send(cls, subject: str, body: str, _subtype: Optional[str] = None) -> Optional[bool]:
+        _subtype = _subtype or "plain"
+
         FROM = cls.SMTP_USER
         TO = cls.RECIPIENT
         SUBJECT = subject
