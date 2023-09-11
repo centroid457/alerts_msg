@@ -25,7 +25,7 @@ pip install alerts_msg
 ```
 
 ## Import
-[HISTORY.md](HISTORY.md)
+
 ```python
 from alerts_msg import *
 ```
