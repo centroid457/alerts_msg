@@ -1,11 +1,9 @@
 # private_values
 
 
-Designed to 
-
 ## Features
 
-1. 
+1. send emails
 
 
 ## License
@@ -33,4 +31,50 @@ from alerts_msg import *
 
 ## GUIDE
 
-### 1.
+### AlertSmtp
+
+#### 1. add new server if not exists
+
+```python
+from alerts_msg import *
+
+class SmtpServersMOD(SmtpServers):
+    EXAMPLE_RU: SmtpAddress = SmtpAddress("smtp.EXAMPLE.ru", 123)
+
+class AlertSmtpMOD(AlertSmtp):
+    SERVER: SmtpAddress = SmtpServersMOD.EXAMPLE_RU   # or direct =SmtpAddress("smtp.EXAMPLE.ru", 123)
+```
+
+#### 2. change other settings
+
+```python
+from alerts_msg import *
+
+class AlertSmtpMOD(AlertSmtp):
+    TIMEOUT_RECONNECT: int = 60
+    RECONNECT_LIMIT: int = 10
+
+    TIMEOUT_RATELIMIT: int = 600
+
+    RECIPIENT: str = "my_address_2@mail.ru"
+```
+
+#### 3. send
+
+* if no mods
+```python
+from alerts_msg import *
+
+AlertSmtp.send(subject="Hello", body="World!")
+```
+
+* with mods
+
+```python
+from alerts_msg import *
+
+class AlertSmtpMOD(AlertSmtp):
+    pass    # changed
+
+AlertSmtpMOD.send(subject="Hello", body="World!")
+```
