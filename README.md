@@ -45,7 +45,17 @@ class AlertSmtpMOD(AlertSmtp):
     SERVER: SmtpAddress = SmtpServersMOD.EXAMPLE_RU   # or direct =SmtpAddress("smtp.EXAMPLE.ru", 123)
 ```
 
-#### 2. change other settings
+#### 2. change authorisation data (see module `private_values` for details)
+
+```python
+from alerts_msg import *
+
+class AlertSmtpMOD(AlertSmtp):
+    SMTP_USER: str = "example@mail.ru"
+    SMTP_PWD: str = EnvValues.get("myCustomPrivateEnvName")
+```
+
+#### 3. change other settings
 
 ```python
 from alerts_msg import *
@@ -59,7 +69,7 @@ class AlertSmtpMOD(AlertSmtp):
     RECIPIENT: str = "my_address_2@mail.ru"
 ```
 
-#### 3. send
+#### 4. send
 
 * if no mods
 ```python
