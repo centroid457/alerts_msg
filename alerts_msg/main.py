@@ -118,9 +118,4 @@ class AlertSmtp:
 
 # =====================================================================================================================
 if __name__ == "__main__":
-    for subj, body, _subtype in [
-        ("[ALERT]plain123", "plain123", "plain123"),
-        ("[ALERT]plain", "plain", "plain"),
-        ("[ALERT]html", "<p><font color='red'>html(red)</font></p>", "html")
-    ]:
-        AlertSmtp.send(subj, body, _subtype)
+    pass
