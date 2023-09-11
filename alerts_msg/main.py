@@ -36,25 +36,22 @@ class AlertSmtp:
 
     _smtp: Optional[smtplib.SMTP_SSL] = None
 
-    def __init__(self):
-        super().__init__()
-        self._connect()
-
     # CONNECT =========================================================================================================
-    def _connect(self) -> Optional[bool]:
+    @classmethod
+    def _connect(cls) -> Optional[bool]:
         result = None
 
-        if not self._smtp:
-            print(f"TRY _connect {self.__class__.__name__}")
+        if not cls._smtp:
+            print(f"TRY _connect {cls.__class__.__name__}")
             try:
-                self._smtp = smtplib.SMTP_SSL(self.SERVER.ADDR, self.SERVER.PORT, timeout=5)
+                cls._smtp = smtplib.SMTP_SSL(cls.SERVER.ADDR, cls.SERVER.PORT, timeout=5)
             except Exception as exx:
                 print(f"[CRITICAL] CONNECT {exx!r}")
-                self._clear()
+                cls._clear()
 
-        if self._smtp:
+        if cls._smtp:
             try:
-                result = self._smtp.login(self.SMTP_USER, self.SMTP_PWD)
+                result = cls._smtp.login(cls.SMTP_USER, cls.SMTP_PWD)
             except Exception as exx:
                 print(f"[CRITICAL] LOGIN {exx!r}")
 
@@ -69,18 +66,21 @@ class AlertSmtp:
             print()
             return True
 
-    def _disconnect(self) -> None:
-        if self._smtp:
-            self._smtp.quit()
-        self._clear()
+    @classmethod
+    def _disconnect(cls) -> None:
+        if cls._smtp:
+            cls._smtp.quit()
+        cls._clear()
 
-    def _clear(self) -> None:
-        self._smtp = None
+    @classmethod
+    def _clear(cls) -> None:
+        cls._smtp = None
 
     # MSG =============================================================================================================
-    def send(self, subject: str, body: Any, _subtype="plain") -> Optional[bool]:
-        FROM = self.SMTP_USER
-        TO = self.RECIPIENT
+    @classmethod
+    def send(cls, subject: str, body: Any, _subtype="plain") -> Optional[bool]:
+        FROM = cls.SMTP_USER
+        TO = cls.RECIPIENT
         SUBJECT = subject
         BODY = str(body)
 
@@ -91,21 +91,21 @@ class AlertSmtp:
         msg.attach(MIMEText(BODY, _subtype=_subtype))
 
         counter = 0
-        while not self._smtp and counter <= self.RECONNECT_LIMIT:
+        while not cls._smtp and counter <= cls.RECONNECT_LIMIT:
             counter += 1
-            if not self._connect():
+            if not cls._connect():
                 print(f"[WARNING]try {counter=}")
                 print("=" * 100)
                 print()
-                time.sleep(self.TIMEOUT_RECONNECT)
+                time.sleep(cls.TIMEOUT_RECONNECT)
 
-        if self._smtp:
+        if cls._smtp:
             try:
-                print(self._smtp.send_message(msg))
+                print(cls._smtp.send_message(msg))
             except Exception as exx:
                 msg = f"[CRITICAL] unexpected {exx!r}"
                 print(msg)
-                self._clear()
+                cls._clear()
                 return
 
             print("-"*80)
@@ -116,6 +116,5 @@ class AlertSmtp:
 
 # =====================================================================================================================
 if __name__ == "__main__":
-    sender = AlertSmtp()
     for subj, body, _subtype in [("[ALERT]plain123", "plain123", "plain123"), ("[ALERT]plain", "plain", "plain"), ("[ALERT]html", "<p><font color='red'>html(red)</font></p>", "html")]:
-        sender.send(subj, body, _subtype)
+        AlertSmtp.send(subj, body, _subtype)
