@@ -23,8 +23,13 @@ for subj, body, _subtype in [
     ("[ALERT]plain", "plain", "plain"),
     ("[ALERT]html", "<p><font color='red'>html(red)</font></p>", "html")
 ])
-def test__send(subj, body, _subtype):
+def test__send_single(subj, body, _subtype):
     assert AlertSmtp.send(subj, body, _subtype) is True
+
+
+def test__send_multy():
+    assert AlertSmtp.send("[ALERT]multy1", "multy1") is True
+    assert AlertSmtp.send("[ALERT]multy2", "multy2") is True
 
 
 # =====================================================================================================================
