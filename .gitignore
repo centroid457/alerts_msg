@@ -1,0 +1,23 @@
+# virtual env python
+.venv/
+venv/
+env/
+
+# byte-compiled
+**/__pycache__/
+**/*.py[cod]
+
+# pycharm
+.idea/
+
+# PYTEST
+**/.pytest_cache/
+
+# TEMP
+TEMPORARY/
+-*
+
+# DISTRIBUTION
+build/
+dist/
+*.egg-info/
