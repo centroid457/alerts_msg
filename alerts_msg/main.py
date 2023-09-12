@@ -37,64 +37,43 @@ class AlertSmtp(threading.Thread):
 
     _smtp: Optional[smtplib.SMTP_SSL] = None
     _result: Optional[bool] = None   # careful!
-    _mutex: threading.Lock = None
 
     def __init__(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None):
         super().__init__(daemon=True)
 
-        self._mutex_set()
-
-        self._body: Optional[str] = None
-        self._subj_suffix:Optional[str] = None
-        self._subtype: Optional[str] = None
+        self._body: Optional[str] = body
+        self._subj_suffix:Optional[str] = subj_suffix
+        self._subtype: Optional[str] = _subtype or "plain"
 
         if not self.RECIPIENT:
             self.RECIPIENT = self.SMTP_USER
 
-        if body:
-            self._send_thread(subj_suffix=subj_suffix, body=body, _subtype=_subtype)
+        self.start()
 
-    @classmethod
-    def _mutex_set(cls) -> None:
-        if cls._mutex is None:
-            cls._mutex = threading.Lock()
-
-    @classmethod
-    @property
-    def mutex_cls(cls) -> threading.Lock:
-        return cls._mutex
-
-    @classmethod
-    @property
-    def smtp_cls(cls) -> Optional[smtplib.SMTP_SSL]:
-        return cls._smtp
-
-    def _result_wait(self) -> Optional[bool]:
+    def result_wait(self) -> Optional[bool]:
         """
-        for tests mainly! dont use in product! it will stop/wait the thread!
+        for tests mainly! but you can use!
         :return:
         """
         self.join()
         return self._result
 
     # CONNECT =========================================================================================================
-    @classmethod
-    def _connect(cls) -> Optional[bool]:
-        cls.mutex_cls.acquire()
+    def _connect(self) -> Optional[bool]:
         result = None
         response = None
 
-        if not cls._smtp_check_exists():
-            print(f"TRY _connect {cls.__name__}")
+        if not self._smtp_check_exists():
+            print(f"TRY _connect {self.__class__.__name__}")
             try:
-                cls._smtp = smtplib.SMTP_SSL(cls.SERVER.ADDR, cls.SERVER.PORT, timeout=5)
+                self._smtp = smtplib.SMTP_SSL(self.SERVER.ADDR, self.SERVER.PORT, timeout=5)
             except Exception as exx:
                 print(f"[CRITICAL] CONNECT [{exx!r}]")
-                cls._clear()
+                self._clear()
 
-        if cls._smtp_check_exists():
+        if self._smtp_check_exists():
             try:
-                response = cls._smtp.login(cls.SMTP_USER, cls.SMTP_PWD)
+                response = self._smtp.login(self.SMTP_USER, self.SMTP_PWD)
             except Exception as exx:
                 print(f"[CRITICAL] LOGIN [{exx!r}]")
 
@@ -109,22 +88,18 @@ class AlertSmtp(threading.Thread):
             print()
             result = True
 
-        cls.mutex_cls.release()
         return result
 
-    @classmethod
-    def _smtp_check_exists(cls) -> bool:
-        return cls._smtp is not None
+    def _smtp_check_exists(self) -> bool:
+        return self._smtp is not None
 
-    @classmethod
-    def _disconnect(cls) -> None:
-        if cls._smtp:
-            cls._smtp.quit()
-        cls._clear()
+    def _disconnect(self) -> None:
+        if self._smtp:
+            self._smtp.quit()
+        self._clear()
 
-    @classmethod
-    def _clear(cls) -> None:
-        cls._smtp = None
+    def _clear(self) -> None:
+        self._smtp = None
 
     # MSG =============================================================================================================
     def run(self):
@@ -149,12 +124,11 @@ class AlertSmtp(threading.Thread):
 
         if self._smtp_check_exists():
             try:
-                print(self.smtp_cls.send_message(msg))
+                print(self._smtp.send_message(msg))
             except Exception as exx:
                 msg = f"[CRITICAL] unexpected [{exx!r}]"
                 print(msg)
                 self._clear()
-                raise exx   #hide it!
                 return
 
             print("-"*80)
@@ -162,11 +136,7 @@ class AlertSmtp(threading.Thread):
             print("-"*80)
             self._result = True
 
-    def _send_thread(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None) -> None:
-        self._body = body
-        self._subj_suffix = subj_suffix
-        self._subtype = _subtype or "plain"
-
+    def _send_thread(self) -> None:
         self.start()
 
 
@@ -177,7 +147,6 @@ if __name__ == "__main__":
 
     thread1.join()
     thread2.join()
-    exit()
 
     assert thread1._result is True
     assert thread2._result is True
