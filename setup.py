@@ -12,7 +12,7 @@ NAME = "alerts_msg"
 
 setup(
   version="0.0.2",
-  description="All abilities to send alert msgs",
+  description="All abilities to send alert msgs (threading)",
   keywords=["smtp", "mail", "email", "alerts", "notifications", "email alerts"],
   classifiers=[
     # "Framework :: AsyncIO",
