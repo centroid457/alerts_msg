@@ -20,9 +20,8 @@ class SmtpServers:
 
 # =====================================================================================================================
 class AlertSmtp:
-    """
-    main class to work with smtp.
-    """
+    SUBJECT_PREFIX: Optional[str] = "[ALERT]"
+
     SMTP_USER: str = PrivateEnv.get("SMTP_USER")    # example@mail.ru
     SMTP_PWD: str = PrivateEnv.get("SMTP_PWD")     # use thirdPartyPwd!
 
@@ -32,26 +31,35 @@ class AlertSmtp:
 
     TIMEOUT_RATELIMIT: int = 600    # when EXX 451, b'Ratelimit exceeded
 
-    RECIPIENT: str = SMTP_USER
+    RECIPIENT: str = None
 
-    _smtp: Optional[smtplib.SMTP_SSL] = None
+    result: Optional[bool] = None   # for thread
+
+    def __init__(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None):
+        self._smtp: Optional[smtplib.SMTP_SSL] = None
+        if not self.RECIPIENT:
+            self.RECIPIENT = self.SMTP_USER
+
+        if body:
+            self._send(subj_suffix=subj_suffix, body=body, _subtype=_subtype)
 
     # CONNECT =========================================================================================================
-    @classmethod
-    def _connect(cls) -> Optional[bool]:
+    def _connect(self) -> Optional[bool]:
+        self.result = None
+
         result = None
 
-        if not cls._smtp:
-            print(f"TRY _connect {cls.__class__.__name__}")
+        if not self._smtp:
+            print(f"TRY _connect {self.__class__.__name__}")
             try:
-                cls._smtp = smtplib.SMTP_SSL(cls.SERVER.ADDR, cls.SERVER.PORT, timeout=5)
+                self._smtp = smtplib.SMTP_SSL(self.SERVER.ADDR, self.SERVER.PORT, timeout=5)
             except Exception as exx:
                 print(f"[CRITICAL] CONNECT {exx!r}")
-                cls._clear()
+                self._clear()
 
-        if cls._smtp:
+        if self._smtp:
             try:
-                result = cls._smtp.login(cls.SMTP_USER, cls.SMTP_PWD)
+                result = self._smtp.login(self.SMTP_USER, self.SMTP_PWD)
             except Exception as exx:
                 print(f"[CRITICAL] LOGIN {exx!r}")
 
@@ -66,53 +74,50 @@ class AlertSmtp:
             print()
             return True
 
-    @classmethod
-    def _disconnect(cls) -> None:
-        if cls._smtp:
-            cls._smtp.quit()
-        cls._clear()
+    def _disconnect(self) -> None:
+        if self._smtp:
+            self._smtp.quit()
+        self._clear()
 
-    @classmethod
-    def _clear(cls) -> None:
-        cls._smtp = None
+    def _clear(self) -> None:
+        self._smtp = None
 
     # MSG =============================================================================================================
-    @classmethod
-    def send(cls, subject: str, body: str, _subtype: Optional[str] = None) -> Optional[bool]:
+    def _send(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None) -> Optional[bool]:
+        self.result = False
         _subtype = _subtype or "plain"
 
-        FROM = cls.SMTP_USER
-        TO = cls.RECIPIENT
-        SUBJECT = subject
-        BODY = str(body)
+        sbj = f"{self.SUBJECT_PREFIX}{subj_suffix}" if subj_suffix else self.SUBJECT_PREFIX
+        body = str(body) if body else ""
 
         msg = MIMEMultipart()
-        msg['Subject'] = SUBJECT
-        msg["From"] = FROM
-        msg["To"] = TO
-        msg.attach(MIMEText(BODY, _subtype=_subtype))
+        msg["From"] = self.SMTP_USER
+        msg["To"] = self.RECIPIENT
+        msg['Subject'] = sbj
+        msg.attach(MIMEText(body, _subtype=_subtype))
 
         counter = 0
-        while not cls._smtp and counter <= cls.RECONNECT_LIMIT:
+        while not self._smtp and counter <= self.RECONNECT_LIMIT:
             counter += 1
-            if not cls._connect():
+            if not self._connect():
                 print(f"[WARNING]try {counter=}")
                 print("=" * 100)
                 print()
-                time.sleep(cls.TIMEOUT_RECONNECT)
+                time.sleep(self.TIMEOUT_RECONNECT)
 
-        if cls._smtp:
+        if self._smtp:
             try:
-                print(cls._smtp.send_message(msg))
+                print(self._smtp.send_message(msg))
             except Exception as exx:
                 msg = f"[CRITICAL] unexpected {exx!r}"
                 print(msg)
-                cls._clear()
+                self._clear()
                 return
 
             print("-"*80)
             print(msg)
             print("-"*80)
+            self.result = True
             return True
 
 
