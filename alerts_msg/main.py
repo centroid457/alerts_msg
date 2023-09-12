@@ -23,8 +23,8 @@ class AlertSmtp:
     """
     main class to work with smtp.
     """
-    SMTP_USER: str = EnvValues.get("SMTP_USER")    # example@mail.ru
-    SMTP_PWD: str = EnvValues.get("SMTP_PWD")     # use thirdPartyPwd!
+    SMTP_USER: str = PrivateEnv.get("SMTP_USER")    # example@mail.ru
+    SMTP_PWD: str = PrivateEnv.get("SMTP_PWD")     # use thirdPartyPwd!
 
     SERVER: SmtpAddress = SmtpServers.MAIL_RU
     TIMEOUT_RECONNECT: int = 60
