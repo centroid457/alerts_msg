@@ -6,6 +6,6 @@ Release History
 -------------------
 
 **NEW**
-- `first ability SMTP`
+- first ability SMTP
 
 
