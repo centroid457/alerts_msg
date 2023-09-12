@@ -1,6 +1,8 @@
 import time
 from typing import *
 
+import threading
+
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -19,7 +21,7 @@ class SmtpServers:
 
 
 # =====================================================================================================================
-class AlertSmtp:
+class AlertSmtp(threading.Thread):
     SUBJECT_PREFIX: Optional[str] = "[ALERT]"
 
     SMTP_USER: str = PrivateEnv.get("SMTP_USER")    # example@mail.ru
@@ -33,21 +35,34 @@ class AlertSmtp:
 
     RECIPIENT: str = None
 
-    result: Optional[bool] = None   # for thread
+    _result: Optional[bool] = None   # carefull!
+
+    @property
+    def _result_wait(self) -> Optional[bool]:
+        """
+        for tests mainly! dont use in product! it will stop/wait the thread!
+        :return:
+        """
+        self.join()
+        return self._result
 
     def __init__(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None):
-        super().__init__()
+        super().__init__(daemon=True)
 
         self._smtp: Optional[smtplib.SMTP_SSL] = None
+        self._body: Optional[str] = None
+        self._subj_suffix:Optional[str] = None
+        self._subtype: Optional[str] = None
+
         if not self.RECIPIENT:
             self.RECIPIENT = self.SMTP_USER
 
         if body:
-            self._send(subj_suffix=subj_suffix, body=body, _subtype=_subtype)
+            self._send_thread(subj_suffix=subj_suffix, body=body, _subtype=_subtype)
 
     # CONNECT =========================================================================================================
     def _connect(self) -> Optional[bool]:
-        self.result = None
+        self._result = None
 
         result = None
 
@@ -85,18 +100,16 @@ class AlertSmtp:
         self._smtp = None
 
     # MSG =============================================================================================================
-    def _send(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None) -> Optional[bool]:
-        self.result = False
-        _subtype = _subtype or "plain"
-
-        sbj = f"{self.SUBJECT_PREFIX}{subj_suffix}" if subj_suffix else self.SUBJECT_PREFIX
-        body = str(body) if body else ""
+    def run(self):
+        self._result = False
+        sbj = f"{self.SUBJECT_PREFIX}{self._subj_suffix}" if self._subj_suffix else self.SUBJECT_PREFIX
+        body = str(self._body) if self._body else ""
 
         msg = MIMEMultipart()
         msg["From"] = self.SMTP_USER
         msg["To"] = self.RECIPIENT
         msg['Subject'] = sbj
-        msg.attach(MIMEText(body, _subtype=_subtype))
+        msg.attach(MIMEText(body, _subtype=self._subtype))
 
         counter = 0
         while not self._smtp and counter <= self.RECONNECT_LIMIT:
@@ -119,8 +132,14 @@ class AlertSmtp:
             print("-"*80)
             print(msg)
             print("-"*80)
-            self.result = True
-            return True
+            self._result = True
+
+    def _send_thread(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None) -> None:
+        self._body = body
+        self._subj_suffix = subj_suffix
+        self._subtype = _subtype or "plain"
+
+        self.start()
 
 
 # =====================================================================================================================

@@ -10,40 +10,39 @@ from alerts_msg import *
 
 
 # =====================================================================================================================
+def test__send_single():
+    assert AlertSmtp("single")._result_wait is True
+
 @pytest.mark.parametrize(argnames="subj_suffix, body, _subtype", argvalues=[
     (None, "zero", None),
     ("", "plain123", "plain123"),
     ("plain", "plain", "plain"),
     ("html", "<p><font color='red'>html(red)</font></p>", "html")
 ])
-def test__send_single(subj_suffix, body, _subtype):
-    assert AlertSmtp(subj_suffix=subj_suffix, body=body, _subtype=_subtype).result is True
+def test__send_single__parametrized(subj_suffix, body, _subtype):
+    assert AlertSmtp(subj_suffix=subj_suffix, body=body, _subtype=_subtype)._result_wait is True
 
 
 def test__send_multy():
-    assert AlertSmtp("multy1").result is True
-    assert AlertSmtp("multy2").result is True
+    assert AlertSmtp("multy1")._result_wait is True
+    assert AlertSmtp("multy2")._result_wait is True
 
+def test__send_multy_thread__own():
+    threads = [
+        AlertSmtp(subj_suffix="thread1"),
+        AlertSmtp(subj_suffix="thread2"),
+        AlertSmtp(subj_suffix="thread3"),
+    ]
 
-def test__send_multy_thread():
-    obj1 = AlertSmtp(subj_suffix="obj1")
-    obj2 = AlertSmtp(subj_suffix="obj2")
-    obj3 = AlertSmtp(subj_suffix="obj3")
+    for thread in threads:
+        thread.start()
 
-    thread1 = threading.Thread(target=obj1._send, kwargs={"body": "thread1"})
-    thread2 = threading.Thread(target=obj2._send, kwargs={"body": "thread2"})
-    thread3 = threading.Thread(target=obj3._send, kwargs={"body": "thread3"})
+    for thread in threads:
+        # need finish all!
+        thread.join()
 
-    thread1.start()
-    thread2.start()
-    thread3.start()
+    for thread in threads:
+        assert thread._result is True
 
-    thread1.join()
-    thread2.join()
-    thread3.join()
-
-    assert obj1.result is True
-    assert obj2.result is True
-    assert obj3.result is True
 
 # =====================================================================================================================
