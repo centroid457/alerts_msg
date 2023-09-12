@@ -26,21 +26,20 @@ class SmtpServers:
 
 
 # =====================================================================================================================
-class AlertSmtp(threading.Thread):
+class _AlertsBase(threading.Thread):
     SUBJECT_PREFIX: Optional[str] = "[ALERT]"
 
-    SMTP_USER: str = PrivateEnv.get("SMTP_USER")    # example@mail.ru
-    SMTP_PWD: str = PrivateEnv.get("SMTP_PWD")     # use thirdPartyPwd!
+    AUTH_USER: str = None
+    AUTH_PWD: str = None
+    SERVER: Union[SmtpAddress, ] = None
 
-    SERVER: SmtpAddress = SmtpServers.MAIL_RU
-    TIMEOUT_RECONNECT: int = 60
     RECONNECT_LIMIT: int = 10
-
+    TIMEOUT_RECONNECT: int = 60
     TIMEOUT_RATELIMIT: int = 600    # when EXX 451, b'Ratelimit exceeded
 
     RECIPIENT: str = None   #leave None if selfSending!
 
-    _smtp: Optional[smtplib.SMTP_SSL] = None
+    _conn: Union[None, smtplib.SMTP_SSL] = None
     _result: Optional[bool] = None   # careful!
 
     def __init__(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None):
@@ -51,9 +50,20 @@ class AlertSmtp(threading.Thread):
         self._subtype: Optional[str] = _subtype or "plain"
 
         if not self.RECIPIENT:
-            self.RECIPIENT = self.SMTP_USER
+            self.RECIPIENT = self.AUTH_USER
 
         self.start()
+
+    def _conn_check_exists(self) -> bool:
+        return self._conn is not None
+
+    def _disconnect(self) -> None:
+        if self._conn:
+            self._conn.quit()
+        self._clear()
+
+    def _clear(self) -> None:
+        self._conn = None
 
     def result_wait(self) -> Optional[bool]:
         """
@@ -63,22 +73,35 @@ class AlertSmtp(threading.Thread):
         self.join()
         return self._result
 
+    def run(self):
+        self._send()
+
+    def _send(self):
+        raise NotImplementedError()
+
+
+# =====================================================================================================================
+class AlertSmtp(_AlertsBase):
+    AUTH_USER: str = PrivateEnv.get("SMTP_USER")    # example@mail.ru
+    AUTH_PWD: str = PrivateEnv.get("SMTP_PWD")     # use thirdPartyPwd!
+    SERVER: SmtpAddress = SmtpServers.MAIL_RU
+
     # CONNECT =========================================================================================================
     def _connect(self) -> Optional[bool]:
         result = None
         response = None
 
-        if not self._smtp_check_exists():
+        if not self._conn_check_exists():
             print(f"TRY _connect {self.__class__.__name__}")
             try:
-                self._smtp = smtplib.SMTP_SSL(self.SERVER.ADDR, self.SERVER.PORT, timeout=5)
+                self._conn = smtplib.SMTP_SSL(self.SERVER.ADDR, self.SERVER.PORT, timeout=5)
             except Exception as exx:
                 print(f"[CRITICAL] CONNECT [{exx!r}]")
                 self._clear()
 
-        if self._smtp_check_exists():
+        if self._conn_check_exists():
             try:
-                response = self._smtp.login(self.SMTP_USER, self.SMTP_PWD)
+                response = self._conn.login(self.AUTH_USER, self.AUTH_PWD)
             except Exception as exx:
                 print(f"[CRITICAL] LOGIN [{exx!r}]")
 
@@ -95,31 +118,20 @@ class AlertSmtp(threading.Thread):
 
         return result
 
-    def _smtp_check_exists(self) -> bool:
-        return self._smtp is not None
-
-    def _disconnect(self) -> None:
-        if self._smtp:
-            self._smtp.quit()
-        self._clear()
-
-    def _clear(self) -> None:
-        self._smtp = None
-
     # MSG =============================================================================================================
-    def run(self):
+    def _send(self):
         self._result = False
         sbj = f"{self.SUBJECT_PREFIX}{self._subj_suffix}" if self._subj_suffix else self.SUBJECT_PREFIX
         body = str(self._body) if self._body else ""
 
         msg = MIMEMultipart()
-        msg["From"] = self.SMTP_USER
+        msg["From"] = self.AUTH_USER
         msg["To"] = self.RECIPIENT
         msg['Subject'] = sbj
         msg.attach(MIMEText(body, _subtype=self._subtype))
 
         counter = 0
-        while not self._smtp_check_exists() and counter <= self.RECONNECT_LIMIT:
+        while not self._conn_check_exists() and counter <= self.RECONNECT_LIMIT:
             counter += 1
             if not self._connect():
                 print(f"[WARNING]try {counter=}")
@@ -127,9 +139,9 @@ class AlertSmtp(threading.Thread):
                 print()
                 time.sleep(self.TIMEOUT_RECONNECT)
 
-        if self._smtp_check_exists():
+        if self._conn_check_exists():
             try:
-                print(self._smtp.send_message(msg))
+                print(self._conn.send_message(msg))
             except Exception as exx:
                 msg = f"[CRITICAL] unexpected [{exx!r}]"
                 print(msg)
@@ -140,9 +152,6 @@ class AlertSmtp(threading.Thread):
             print(msg)
             print("-"*80)
             self._result = True
-
-    def _send_thread(self) -> None:
-        self.start()
 
 
 # =====================================================================================================================

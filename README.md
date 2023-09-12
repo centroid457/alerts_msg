@@ -52,9 +52,10 @@ class AlertSmtpMOD(AlertSmtp):
 ```python
 from alerts_msg import *
 
+
 class AlertSmtpMOD(AlertSmtp):
-    SMTP_USER: str = "example@mail.ru"
-    SMTP_PWD: str = PrivateEnv.get("myCustomPrivateEnvName")
+    AUTH_USER: str = "example@mail.ru"
+    AUTH_PWD: str = PrivateEnv.get("myCustomPrivateEnvName")
 ```
 
 #### 3. change other settings (see source for other not mentioned)
