@@ -80,14 +80,14 @@ class AlertSmtp(threading.Thread):
             try:
                 cls._smtp = smtplib.SMTP_SSL(cls.SERVER.ADDR, cls.SERVER.PORT, timeout=5)
             except Exception as exx:
-                print(f"[CRITICAL] CONNECT {exx!r}")
+                print(f"[CRITICAL] CONNECT [{exx!r}]")
                 cls._clear()
 
         if cls._smtp_check_exists():
             try:
                 response = cls._smtp.login(cls.SMTP_USER, cls.SMTP_PWD)
             except Exception as exx:
-                print(f"[CRITICAL] LOGIN {exx!r}")
+                print(f"[CRITICAL] LOGIN [{exx!r}]")
 
             print(response)
             print("="*100)
@@ -142,10 +142,10 @@ class AlertSmtp(threading.Thread):
             try:
                 print(self.__class__._smtp.send_message(msg))
             except Exception as exx:
-                msg = f"[CRITICAL] unexpected {exx!r}"
+                msg = f"[CRITICAL] unexpected [{exx!r}]"
                 print(msg)
                 self._clear()
-                raise exx
+                raise exx   #hide it!
                 return
 
             print("-"*80)
