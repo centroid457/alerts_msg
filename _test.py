@@ -11,7 +11,7 @@ from alerts_msg import *
 
 # =====================================================================================================================
 def test__send_single():
-    assert AlertSmtp("single")._result_wait is True
+    assert AlertSmtp("single")._result_wait() is True
 
 @pytest.mark.parametrize(argnames="subj_suffix, body, _subtype", argvalues=[
     (None, "zero", None),
@@ -20,12 +20,12 @@ def test__send_single():
     ("html", "<p><font color='red'>html(red)</font></p>", "html")
 ])
 def test__send_single__parametrized(subj_suffix, body, _subtype):
-    assert AlertSmtp(subj_suffix=subj_suffix, body=body, _subtype=_subtype)._result_wait is True
+    assert AlertSmtp(subj_suffix=subj_suffix, body=body, _subtype=_subtype)._result_wait() is True
 
 
 def test__send_multy__result_wait():
-    assert AlertSmtp("multy1")._result_wait is True
-    assert AlertSmtp("multy2")._result_wait is True
+    assert AlertSmtp("multy1")._result_wait() is True
+    assert AlertSmtp("multy2")._result_wait() is True
 
 def test__send_multy__wait_join():
     thread1 = AlertSmtp("thread1")

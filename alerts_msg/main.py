@@ -33,7 +33,7 @@ class AlertSmtp(threading.Thread):
 
     TIMEOUT_RATELIMIT: int = 600    # when EXX 451, b'Ratelimit exceeded
 
-    RECIPIENT: str = None
+    RECIPIENT: str = None   #leave None if selfSending!
 
     _smtp: Optional[smtplib.SMTP_SSL] = None
     _result: Optional[bool] = None   # careful!
@@ -59,7 +59,16 @@ class AlertSmtp(threading.Thread):
         if cls._mutex is None:
             cls._mutex = threading.Lock()
 
+    @classmethod
     @property
+    def mutex_cls(cls) -> threading.Lock:
+        return cls._mutex
+
+    @classmethod
+    @property
+    def smtp_cls(cls) -> Optional[smtplib.SMTP_SSL]:
+        return cls._smtp
+
     def _result_wait(self) -> Optional[bool]:
         """
         for tests mainly! dont use in product! it will stop/wait the thread!
@@ -71,12 +80,12 @@ class AlertSmtp(threading.Thread):
     # CONNECT =========================================================================================================
     @classmethod
     def _connect(cls) -> Optional[bool]:
-        cls._mutex.acquire()
+        cls.mutex_cls.acquire()
         result = None
         response = None
 
         if not cls._smtp_check_exists():
-            print(f"TRY _connect {cls.__class__.__name__}")
+            print(f"TRY _connect {cls.__name__}")
             try:
                 cls._smtp = smtplib.SMTP_SSL(cls.SERVER.ADDR, cls.SERVER.PORT, timeout=5)
             except Exception as exx:
@@ -100,12 +109,12 @@ class AlertSmtp(threading.Thread):
             print()
             result = True
 
-        cls._mutex.release()
+        cls.mutex_cls.release()
         return result
 
     @classmethod
     def _smtp_check_exists(cls) -> bool:
-        return cls._smtp != None
+        return cls._smtp is not None
 
     @classmethod
     def _disconnect(cls) -> None:
@@ -140,7 +149,7 @@ class AlertSmtp(threading.Thread):
 
         if self._smtp_check_exists():
             try:
-                print(self.__class__._smtp.send_message(msg))
+                print(self.smtp_cls.send_message(msg))
             except Exception as exx:
                 msg = f"[CRITICAL] unexpected [{exx!r}]"
                 print(msg)
