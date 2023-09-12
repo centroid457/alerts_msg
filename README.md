@@ -3,7 +3,7 @@
 
 ## Features
 
-1. send emails
+1. send emails (threading!)
 
 
 ## License
@@ -31,6 +31,8 @@ from alerts_msg import *
 
 ## GUIDE
 
+See tests for other examples.
+
 ### AlertSmtp
 
 #### 1. add new server if not exists
@@ -52,10 +54,10 @@ from alerts_msg import *
 
 class AlertSmtpMOD(AlertSmtp):
     SMTP_USER: str = "example@mail.ru"
-    SMTP_PWD: str = EnvValues.get("myCustomPrivateEnvName")
+    SMTP_PWD: str = PrivateEnv.get("myCustomPrivateEnvName")
 ```
 
-#### 3. change other settings
+#### 3. change other settings (see source for other not mentioned)
 
 ```python
 from alerts_msg import *
@@ -75,7 +77,7 @@ class AlertSmtpMOD(AlertSmtp):
 ```python
 from alerts_msg import *
 
-AlertSmtp.send(subject="Hello", body="World!")
+AlertSmtp(subj_suffix="Hello", body="World!")
 ```
 
 * with mods
@@ -86,5 +88,5 @@ from alerts_msg import *
 class AlertSmtpMOD(AlertSmtp):
     pass    # changed
 
-AlertSmtpMOD.send(subject="Hello", body="World!")
+AlertSmtpMOD(subj_suffix="Hello", body="World!")
 ```
