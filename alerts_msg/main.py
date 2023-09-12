@@ -11,6 +11,11 @@ from private_values import *
 
 
 # =====================================================================================================================
+# TODO: cant solve not to use always connecting - tried many variants!
+# make decition - use only one ability to send - only by instantiating!
+# always will connecting! but always in threads! so dont mind!
+
+# =====================================================================================================================
 class SmtpAddress(NamedTuple):
     ADDR: str
     PORT: int
