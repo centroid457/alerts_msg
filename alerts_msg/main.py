@@ -36,6 +36,8 @@ class AlertSmtp:
     result: Optional[bool] = None   # for thread
 
     def __init__(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None):
+        super().__init__()
+
         self._smtp: Optional[smtplib.SMTP_SSL] = None
         if not self.RECIPIENT:
             self.RECIPIENT = self.SMTP_USER
