@@ -1,4 +1,4 @@
-# private_values
+# alerts_msg
 
 
 ## Features
@@ -31,7 +31,7 @@ from alerts_msg import *
 
 ## GUIDE
 
-See tests for other examples.
+See tests and source for other examples.
 
 ### AlertSmtp
 
