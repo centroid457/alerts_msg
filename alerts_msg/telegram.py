@@ -1,8 +1,9 @@
+from .main import *
+
 import time
 from typing import *
 
 import telebot
-import threading
 import random
 
 from private_values import *
@@ -10,7 +11,7 @@ from singleton_meta import *
 
 
 # =====================================================================================================================
-class TelegramBot(Singleton, threading.Thread):
+class AlertTelegram(AlertsBase):
     _INSTANCE_ID: int = None
 
     ADDRESS: PrivateJsonTgBotAddress = PrivateJsonTgBotAddress().get_section("TGBOT1")
@@ -221,7 +222,7 @@ class TelegramBot(Singleton, threading.Thread):
 
 # =====================================================================================================================
 if __name__ == "__main__":
-    obj = TelegramBot()
+    obj = AlertTelegram()
     while True:
         time.sleep(1)
 
