@@ -14,44 +14,36 @@ from private_values import *
 
 
 # =====================================================================================================================
-class TgBotAddress(NamedTuple):
+class TgBotAddress(PrivateJson):
+    LINK_ID: str  # @mybot20230913
+    NAME: str  # MyBot - PublicName
     TOKEN: str
-    NAME: Optional[str] = None  # MyBot - PublicName
-    LINK: Optional[str] = None  # @mybot20230913 - uniqName
-
-
-class TgBotAddresses:
-    BOT1: TgBotAddress = TgBotAddress(PrivateIni().get("BOT1"), "BOT1")
-    BOT2: TgBotAddress = TgBotAddress(PrivateIni().get("BOT2"), "BOT2")
-    BOT3: TgBotAddress = TgBotAddress(PrivateIni().get("BOT3"), "BOT3")
 
 
 # =====================================================================================================================
-class TelegramBot:
-    _TG_PYTHON_ID: int = None
+class TelegramBot(threading.Thread):
+    _INSTANCE_ID: int = None
 
-    BOT_NAME: str = "BOT1"
-    TG_ABONENT_ID: int = 906635346
+    ADDRESS: str = TgBotAddress().get_section("TGBOT1")
+    RECIPIENT_ID: int = PrivateJson().get("MyTgID")
 
-    TG_MSG__START__TITLE = "============= START WORKING ============="
-    TG_MSG__LINE__WRAP_MAIN = "=" * 40
-    TG_MSG__LINE__SEPARATE = "-" * 40*2
-    TG_MSG__LINE__WRAP_ALERT = f"!" * 30 + f" [[[[ALERT]]]] " + f"!" * 30
+    MSG_START = "============= START WORKING ============="
 
     # INIT ============================================================================================================
     def __init__(self):
         super().__init__()
+
         # INITS --------------------------------------------
-        self._TG_PYTHON_ID = random.randrange(10000)
+        self._INSTANCE_ID = random.randrange(10000)
         self.TG_MSG__LAST_SEND: tp.Optional[telebot.types.Message] = None
 
         self.TG_CMDS_FUNCS: tp.Dict[str, tp.Callable] = {}
         self.TG_CMDS_FUNCS__update()
 
         # WORK --------------------------------------------
-        self._TG_BOT = telebot.TeleBot(token=self._TG_BOT_NAMES_TOKENS[self.BOT_NAME])
+        self._TG_BOT = telebot.TeleBot(token=self._TG_BOT_NAMES_TOKENS[self.ADDRESS])
         self.tg_msg__send__start()
-        self.tg_msg__send(text=self.BOT_NAME, forget_last=False, wrap=True)
+        self.tg_msg__send(text=self.ADDRESS, forget_last=False, wrap=True)
         self.tg_handlers_init()
 
         self.TG_START()
@@ -136,7 +128,7 @@ class TelegramBot:
             result += self._tg_msg__create__cmds()
 
             # add id ---------------------------
-            result += f"[{_id}/bot_{self._TG_PYTHON_ID}]\n"
+            result += f"[{_id}/bot_{self._INSTANCE_ID}]\n"
 
             # add datetime ---------------------------
             result += f"{self._tg_msg__create__time()}\n"
@@ -176,7 +168,7 @@ class TelegramBot:
     def tg_msg__send(self, text: tp.Any, forget_last=None, wrap: bool = None) -> None:
         if wrap:
             text = self._tg_msg__wrap(msg=text, _add_footer=True)
-        self.TG_MSG__LAST_SEND = self._TG_BOT.send_message(chat_id=self.TG_ABONENT_ID, text=str(text))
+        self.TG_MSG__LAST_SEND = self._TG_BOT.send_message(chat_id=self.RECIPIENT_ID, text=str(text))
         if forget_last:
             self.TG_MSG__LAST_SEND__clear()
 
@@ -200,13 +192,13 @@ class TelegramBot:
             text = self._tg_msg__wrap_with_footer(msg=_msg)
 
         try:
-            self._TG_BOT.edit_message_text(text=text, chat_id=self.TG_ABONENT_ID, message_id=self.TG_MSG__LAST_SEND.message_id)
+            self._TG_BOT.edit_message_text(text=text, chat_id=self.RECIPIENT_ID, message_id=self.TG_MSG__LAST_SEND.message_id)
         except:
             self.TG_MSG__LAST_SEND__clear()
 
     def tg_msg__delete(self, msg_id: int) -> tp.Optional[bool]:
         try:
-            self._TG_BOT.delete_message(chat_id=self.TG_ABONENT_ID, message_id=msg_id)
+            self._TG_BOT.delete_message(chat_id=self.RECIPIENT_ID, message_id=msg_id)
             return True
         except Exception as exx:
             print(f"{msg_id=}/{exx!r}")
