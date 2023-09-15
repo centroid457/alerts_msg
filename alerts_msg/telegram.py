@@ -3,65 +3,53 @@ from typing import *
 
 import telebot
 import threading
-import typing as tp
 import random
 
 from private_values import *
+from singleton_meta import *
 
 
 # =====================================================================================================================
-# TODO: msgs = mark all as readed!
-
-
-# =====================================================================================================================
-class TgBotAddress(PrivateJson):
-    LINK_ID: str  # @mybot20230913
-    NAME: str  # MyBot - PublicName
-    TOKEN: str
-
-
-# =====================================================================================================================
-class TelegramBot(threading.Thread):
+class TelegramBot(Singleton, threading.Thread):
     _INSTANCE_ID: int = None
 
-    ADDRESS: str = TgBotAddress().get_section("TGBOT1")
+    ADDRESS: PrivateJsonTgBotAddress = PrivateJsonTgBotAddress().get_section("TGBOT1")
     RECIPIENT_ID: int = PrivateJson().get("MyTgID")
 
     MSG_START = "============= START WORKING ============="
+    MSG_STOP = "============= STOP WORKING ============="
 
     # INIT ============================================================================================================
     def __init__(self):
-        super().__init__()
+        super().__init__(daemon=True)
 
-        # INITS --------------------------------------------
         self._INSTANCE_ID = random.randrange(10000)
-        self.TG_MSG__LAST_SEND: tp.Optional[telebot.types.Message] = None
 
-        self.TG_CMDS_FUNCS: tp.Dict[str, tp.Callable] = {}
-        self.TG_CMDS_FUNCS__update()
+        self.msg_cmds: Dict[str, Callable] = {
+            # dont use slash sign here! is is incorrect!
+            "MAIN_MSG": self.tg_msg__send__main,
+            "DATETIME": self.tg_msg__send__time,
+        }
+        self.MSG_CMDS_update()
 
-        # WORK --------------------------------------------
-        self._TG_BOT = telebot.TeleBot(token=self._TG_BOT_NAMES_TOKENS[self.ADDRESS])
-        self.tg_msg__send__start()
-        self.tg_msg__send(text=self.ADDRESS, forget_last=False, wrap=True)
-        self.tg_handlers_init()
-
-        self.TG_START()
+        self._conn = telebot.TeleBot(token=self.ADDRESS.TOKEN)
+        self.handlers_init()
+        self.send_start()
 
     def __del__(self):
-        self.tg_msg__send(text="========== STOP working ==========")
+        self.tg_msg__send(text=self.MSG_STOP)
 
     # init HANDLERS ---------------------------------------------------------------------------------------------------
-    def TG_CMDS_FUNCS__update(self, cmds: tp.Optional[tp.Dict[str, tp.Callable]] = None) -> None:
-        if cmds is None:
-            cmds = {
-                # dont use slash sign here! is is incorrect!
-                "MAIN_MSG": self.tg_msg__send__main,
-                "DATETIME": self.tg_msg__send__time,
-            }
-            self.TG_CMDS_FUNCS.update(cmds)
+    def MSG_CMDS_update(self) -> None:
+        """
+        reinit if you need add new cmds!
+        :return:
+        """
+        cmds: Dict[str, Callable] = {}
+        if cmds:
+            self.msg_cmds.update(cmds)
 
-    def tg_handlers_init(self):
+    def handlers_init(self):
         """
         this is implementation for standart code:
             @bot.message_handler(commands=['start'])
@@ -75,8 +63,8 @@ class TelegramBot(threading.Thread):
         self._tg_handlers_init__2_any_comment()
 
     def _tg_handlers_init__1_commands(self) -> None:
-        for name, func in self.TG_CMDS_FUNCS.items():
-            self._TG_BOT.register_message_handler(func, commands=[name])
+        for name, func in self.HANDLERS.items():
+            self._conn.register_message_handler(func, commands=[name])
 
     def _tg_handlers_init__2_any_comment(self) -> None:
         handler_dict = dict(
@@ -85,14 +73,13 @@ class TelegramBot(threading.Thread):
                 # commands=["start"],
             )
         )
-        self._TG_BOT.add_message_handler(handler_dict)
+        self._conn.add_message_handler(handler_dict)
 
-    def TG_START(self):
-        thread = threading.Thread(target=self._TG_BOT.infinity_polling, daemon=True)
-        thread.start()
+    def run(self):
+        self._conn.infinity_polling()
 
     # MSG PARTS ========================================================================================================
-    def tg_msg__get_active(self, _msg: tp.Optional[telebot.types.Message] = None):
+    def tg_msg__get_active(self, _msg: Optional[telebot.types.Message] = None):
         _msg = _msg or self.TG_MSG__LAST_SEND
         return _msg
 
@@ -100,7 +87,7 @@ class TelegramBot(threading.Thread):
         self.TG_MSG__LAST_SEND = None
 
     # TEXT WORK -------------------------------------------
-    def _tg_msg__wrap(self, msg: tp.Union[str, telebot.types.Message], _id: int = None, wrap_line: str = None, _add_footer: bool = None) -> str:
+    def _tg_msg__wrap(self, msg: Union[str, telebot.types.Message], _id: int = None, wrap_line: str = None, _add_footer: bool = None) -> str:
         # input -------------------------------
         if isinstance(msg, telebot.types.Message):
             text = msg.text
@@ -143,7 +130,7 @@ class TelegramBot(threading.Thread):
 
     def _tg_msg__create__cmds(self) -> str:
         result = ""
-        for cmd in self.TG_CMDS_FUNCS:
+        for cmd in self.HANDLERS:
             result += f"/{cmd}\n"
         return result
 
@@ -151,7 +138,7 @@ class TelegramBot(threading.Thread):
     def _tg_msg__create__time() -> str:
         return str(time.strftime("%Y.%m.%d__%H:%M:%S"))
 
-    def _tg_msg__create__separated_from_list(self, text_list: tp.List[str]) -> str:
+    def _tg_msg__create__separated_from_list(self, text_list: List[str]) -> str:
         result = ""
         count = len(text_list)
         for pos, line in enumerate(text_list, start=1):
@@ -165,10 +152,10 @@ class TelegramBot(threading.Thread):
     def tg_msg_last__refresh_footer(self):
         self.tg_msg__edit()
 
-    def tg_msg__send(self, text: tp.Any, forget_last=None, wrap: bool = None) -> None:
+    def tg_msg__send(self, text: Any, forget_last=None, wrap: bool = None) -> None:
         if wrap:
             text = self._tg_msg__wrap(msg=text, _add_footer=True)
-        self.TG_MSG__LAST_SEND = self._TG_BOT.send_message(chat_id=self.RECIPIENT_ID, text=str(text))
+        self.TG_MSG__LAST_SEND = self._conn.send_message(chat_id=self.RECIPIENT_ID, text=str(text))
         if forget_last:
             self.TG_MSG__LAST_SEND__clear()
 
@@ -178,13 +165,13 @@ class TelegramBot(threading.Thread):
             self.tg_msg__send(text, forget_last=True)
             time.sleep(1)
 
-    def tg_msg__reply(self, msg: telebot.types.Message, text: tp.Optional[str] = None):
+    def tg_msg__reply(self, msg: telebot.types.Message, text: Optional[str] = None):
         if text is None:
             text = msg.text
 
-        self._TG_BOT.reply_to(msg, text)
+        self._conn.reply_to(msg, text)
 
-    def tg_msg__edit(self, text: tp.Optional[str] = None, _msg: tp.Optional[telebot.types.Message] = None):
+    def tg_msg__edit(self, text: Optional[str] = None, _msg: Optional[telebot.types.Message] = None):
         _msg = self.tg_msg__get_active(_msg)
         if text:
             text = self._tg_msg__wrap_with_footer(msg=text, _id=_msg.message_id)
@@ -192,13 +179,13 @@ class TelegramBot(threading.Thread):
             text = self._tg_msg__wrap_with_footer(msg=_msg)
 
         try:
-            self._TG_BOT.edit_message_text(text=text, chat_id=self.RECIPIENT_ID, message_id=self.TG_MSG__LAST_SEND.message_id)
+            self._conn.edit_message_text(text=text, chat_id=self.RECIPIENT_ID, message_id=self.TG_MSG__LAST_SEND.message_id)
         except:
             self.TG_MSG__LAST_SEND__clear()
 
-    def tg_msg__delete(self, msg_id: int) -> tp.Optional[bool]:
+    def tg_msg__delete(self, msg_id: int) -> Optional[bool]:
         try:
-            self._TG_BOT.delete_message(chat_id=self.RECIPIENT_ID, message_id=msg_id)
+            self._conn.delete_message(chat_id=self.RECIPIENT_ID, message_id=msg_id)
             return True
         except Exception as exx:
             print(f"{msg_id=}/{exx!r}")
@@ -212,11 +199,11 @@ class TelegramBot(threading.Thread):
                 break
 
         if _send_start:
-            self.tg_msg__send__start()
+            self.send_start()
             self.tg_msg__send__time()	# just to ansure it will not overwrite by new monitoring state!
 
     # special -----------------------------------------------
-    def tg_msg__send__start(self):
+    def send_start(self):
         self.tg_msg__send(text="delete all on start", forget_last=False)
         self.tg_msg__delete_all(_send_start=False)
 
