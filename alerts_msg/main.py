@@ -31,16 +31,15 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
     def __init__(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None):
         super().__init__(daemon=True)
 
-        # self._mutex: threading.Lock = threading.Lock()
+        self._mutex: threading.Lock = threading.Lock()
+        self.RECIPIENT = self.RECIPIENT or self.AUTH_USER
 
-        self._body: Optional[str] = body
-        self._subj_suffix:Optional[str] = subj_suffix
-        self._subtype: Optional[str] = _subtype or "plain"
+        self._body: Optional[str] = None
+        self._subj_suffix: Optional[str] = None
+        self._subtype: Optional[str] = None
 
-        if not self.RECIPIENT:
-            self.RECIPIENT = self.AUTH_USER
-
-        self.start()
+        if body is not None:
+            self.send(body=body, subj_suffix=subj_suffix, _subtype=_subtype)
 
     def _conn_check_exists(self) -> bool:
         return self._conn is not None
@@ -61,10 +60,57 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
         self.join()
         return self._result
 
-    def run(self):
-        self._send()
+    def _connect(self) -> Optional[bool]:
+        self._mutex.acquire()
 
-    def _send(self):
+        result = None
+        response = None
+
+        if not self._conn_check_exists():
+            print(f"TRY _connect {self.__class__.__name__}")
+            try:
+                self._conn = self._connect_unsafe()
+            except Exception as exx:
+                print(f"[CRITICAL] CONNECT [{exx!r}]")
+                self._clear()
+
+        if self._conn_check_exists():
+            try:
+                response = self._login_unsafe()
+                print(response)
+                print("=" * 100)
+            except Exception as exx:
+                print(f"[CRITICAL] LOGIN [{exx!r}]")
+                self._clear()
+
+        if response and response[0] in [235, 503]:
+            print("[READY] connection")
+            print("="*100)
+            print("="*100)
+            print("="*100)
+            print()
+            result = True
+
+        self._mutex.release()
+        return result
+
+    def send(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None):
+        self._mutex.acquire()
+
+        # save before START thread!
+        self._body: Optional[str] = body or ""
+        self._subj_suffix: Optional[str] = subj_suffix or ""
+        self._subtype: Optional[str] = _subtype or "plain"
+        self.start()
+
+    # OVERWRITE -------------------------------------------------------------------------------------------------------
+    def _connect_unsafe(self) -> Any:
+        raise NotImplementedError()
+
+    def _login_unsafe(self) -> Any:
+        raise NotImplementedError()
+
+    def run(self):  #ACTUAL SENDING! WO PARAMS!!!
         raise NotImplementedError()
 
 

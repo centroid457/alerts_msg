@@ -32,51 +32,28 @@ class AlertSmtp(AlertsBase):
     SERVER: SmtpAddress = SmtpServers.MAIL_RU
 
     # CONNECT =========================================================================================================
-    def _connect(self) -> Optional[bool]:
-        # self._mutex.acquire()
+    def _connect_unsafe(self) -> Any:
+        return smtplib.SMTP_SSL(self.SERVER.ADDR, self.SERVER.PORT, timeout=5)
 
-        result = None
-        response = None
-
-        if not self._conn_check_exists():
-            print(f"TRY _connect {self.__class__.__name__}")
-            try:
-                self._conn = smtplib.SMTP_SSL(self.SERVER.ADDR, self.SERVER.PORT, timeout=5)
-            except Exception as exx:
-                print(f"[CRITICAL] CONNECT [{exx!r}]")
-                self._clear()
-
-        if self._conn_check_exists():
-            try:
-                response = self._conn.login(self.AUTH_USER, self.AUTH_PWD)
-            except Exception as exx:
-                print(f"[CRITICAL] LOGIN [{exx!r}]")
-
-            print(response)
-            print("="*100)
-
-        if response and response[0] in [235, 503]:
-            print("[READY] connection")
-            print("="*100)
-            print("="*100)
-            print("="*100)
-            print()
-            result = True
-
-        # self._mutex.release()
-        return result
+    def _login_unsafe(self) -> Any:
+        return self._conn.login(self.AUTH_USER, self.AUTH_PWD)
 
     # MSG =============================================================================================================
-    def _send(self):
+    def run(self):
         self._result = False
-        sbj = f"{self.SUBJECT_PREFIX}{self._subj_suffix}" if self._subj_suffix else self.SUBJECT_PREFIX
-        body = str(self._body) if self._body else ""
+
+        # load in thread to release attrs in object - so we can use next thread!!!
+        body: Optional[str] = str(self._body)
+        subj_suffix: Optional[str] = self._subj_suffix
+        _subtype: Optional[str] = self._subtype
+
+        self._mutex.release()
 
         msg = MIMEMultipart()
         msg["From"] = self.AUTH_USER
         msg["To"] = self.RECIPIENT
-        msg['Subject'] = sbj
-        msg.attach(MIMEText(body, _subtype=self._subtype))
+        msg['Subject'] = f"{self.SUBJECT_PREFIX}{subj_suffix}"
+        msg.attach(MIMEText(body, _subtype=_subtype))
 
         counter = 0
         while not self._conn_check_exists() and counter <= self.RECONNECT_LIMIT:
