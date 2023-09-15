@@ -51,5 +51,16 @@ def test__send_multy_thread__own():
     for thread in threads:
         assert thread._result is True
 
+def test__send_multy_thread_InstSavedMStyle__own():
+    alert = AlertSmtp()
+
+    alert.send("thread1")
+    alert.send("thread2")
+    alert.send("thread3")
+
+    alert.join()
+
+    assert alert._result is True
+
 
 # =====================================================================================================================
