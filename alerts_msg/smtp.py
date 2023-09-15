@@ -1,7 +1,7 @@
+from .main import *
+
 import time
 from typing import *
-
-import threading
 
 import smtplib
 from email.mime.text import MIMEText
@@ -26,68 +26,15 @@ class SmtpServers:
 
 
 # =====================================================================================================================
-class _AlertsBase(threading.Thread):
-    SUBJECT_PREFIX: Optional[str] = "[ALERT]"
-
-    AUTH_USER: str = None
-    AUTH_PWD: str = None
-    SERVER: Union[SmtpAddress, ] = None
-
-    RECONNECT_LIMIT: int = 10
-    TIMEOUT_RECONNECT: int = 60
-    TIMEOUT_RATELIMIT: int = 600    # when EXX 451, b'Ratelimit exceeded
-
-    RECIPIENT: str = None   #leave None if selfSending!
-
-    _conn: Union[None, smtplib.SMTP_SSL] = None
-    _result: Optional[bool] = None   # careful!
-
-    def __init__(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None):
-        super().__init__(daemon=True)
-
-        self._body: Optional[str] = body
-        self._subj_suffix:Optional[str] = subj_suffix
-        self._subtype: Optional[str] = _subtype or "plain"
-
-        if not self.RECIPIENT:
-            self.RECIPIENT = self.AUTH_USER
-
-        self.start()
-
-    def _conn_check_exists(self) -> bool:
-        return self._conn is not None
-
-    def _disconnect(self) -> None:
-        if self._conn:
-            self._conn.quit()
-        self._clear()
-
-    def _clear(self) -> None:
-        self._conn = None
-
-    def result_wait(self) -> Optional[bool]:
-        """
-        for tests mainly! but you can use!
-        :return:
-        """
-        self.join()
-        return self._result
-
-    def run(self):
-        self._send()
-
-    def _send(self):
-        raise NotImplementedError()
-
-
-# =====================================================================================================================
-class AlertSmtp(_AlertsBase):
+class AlertSmtp(AlertsBase):
     AUTH_USER: str = PrivateEnv.get("SMTP_USER")    # example@mail.ru
     AUTH_PWD: str = PrivateEnv.get("SMTP_PWD")     # use thirdPartyPwd!
     SERVER: SmtpAddress = SmtpServers.MAIL_RU
 
     # CONNECT =========================================================================================================
     def _connect(self) -> Optional[bool]:
+        # self._mutex.acquire()
+
         result = None
         response = None
 
@@ -116,6 +63,7 @@ class AlertSmtp(_AlertsBase):
             print()
             result = True
 
+        # self._mutex.release()
         return result
 
     # MSG =============================================================================================================
