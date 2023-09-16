@@ -1,6 +1,12 @@
 Release History
 ===============
 
+0.1.2 (2023-09-16)
+-------------------
+**NEW**
+- add AlertSelect
+- use PrivateJsonAuth as default for smtp
+
 0.1.1 (2023-09-16)
 -------------------
 **NEW**

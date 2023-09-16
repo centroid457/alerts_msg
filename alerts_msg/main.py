@@ -41,8 +41,7 @@ class _AlertInterface(abc.ABC):
 class AlertBase(_AlertInterface, threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WORK!!! and calling logic will be not simle!
     SUBJECT_PREFIX: Optional[str] = "[ALERT]"
 
-    AUTH_USER: str = None
-    AUTH_PWD: str = None
+    AUTH: PrivateJsonAuth = None
 
     RECONNECT_LIMIT: int = 10
     TIMEOUT_RECONNECT: int = 60
@@ -57,7 +56,7 @@ class AlertBase(_AlertInterface, threading.Thread):     # DONT ADD SINGLETON!!! 
         super().__init__(daemon=True)
 
         # self._mutex: threading.Lock = threading.Lock()
-        self.RECIPIENT = self.RECIPIENT or self.AUTH_USER
+        self.RECIPIENT = self.RECIPIENT or self.AUTH.USER
 
         self._body: Optional[str] = body
         self._subj_suffix: Optional[str] = subj_suffix
@@ -131,7 +130,7 @@ class AlertBase(_AlertInterface, threading.Thread):     # DONT ADD SINGLETON!!! 
                 time.sleep(self.TIMEOUT_RECONNECT)
 
         print("[Try send", "-" * 80)
-        print(self.MSG())
+        print(self.MSG)
         print("Try send]", "-" * 80)
 
         if self._conn_check_exists():
