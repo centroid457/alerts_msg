@@ -61,12 +61,3 @@ class AlertSmtp(AlertsBase):
 
 
 # =====================================================================================================================
-if __name__ == "__main__":
-    thread1 = AlertSmtp("thread1")
-    thread2 = AlertSmtp("thread2")
-
-    thread1.join()
-    thread2.join()
-
-    assert thread1._result is True
-    assert thread2._result is True
