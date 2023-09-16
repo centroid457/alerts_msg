@@ -29,8 +29,6 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
     _conn: Union[None, smtplib.SMTP_SSL, telebot.TeleBot] = None
     _result: Optional[bool] = None   # None-in process, False - finished UnSuccess, True - finished success!
 
-    MSG: Any = None
-
     def __init__(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None):
         super().__init__(daemon=True)
 
@@ -64,37 +62,34 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
         return self._result
 
     def _connect(self) -> Optional[bool]:
-        # self._mutex.acquire()
-
         result = None
         response = None
 
         if not self._conn_check_exists():
             print(f"TRY _connect {self.__class__.__name__}")
             try:
-                self._conn = self._connect_unsafe()
+                if self._connect_unsafe():
+                    print("[READY] connect")
+
             except Exception as exx:
                 print(f"[CRITICAL] CONNECT [{exx!r}]")
                 self._clear()
 
         if self._conn_check_exists():
             try:
-                response = self._login_unsafe()
-                print(response)
-                print("=" * 100)
+                result = self._login_unsafe()
+                if result:
+                    print("[READY] login")
             except Exception as exx:
                 print(f"[CRITICAL] LOGIN [{exx!r}]")
                 self._clear()
 
-        if response and response[0] in [235, 503]:
-            print("[READY] connection")
-            print("="*100)
-            print("="*100)
-            print("="*100)
-            print()
-            result = True
+        print("="*100)
+        print("="*100)
+        print("="*100)
+        print()
+        result = True
 
-        # self._mutex.release()
         return result
 
     def run(self) -> None:
@@ -113,27 +108,31 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
 
         if self._conn_check_exists():
             try:
-                print(self._send_unsafe())
+                result = self._send_unsafe()
+                if result:
+                    print("[READY] send")
+                    self._result = True
             except Exception as exx:
                 msg = f"[CRITICAL]unexpected [{exx!r}]"
                 print(msg)
                 self._clear()
-                self._result = False
                 return
 
-            print(f"[OK] msg send!")
+            print()
+            print()
             print()
 
-            self._result = True
+        if self._result is None:
+            self._result = False
 
     # OVERWRITE -------------------------------------------------------------------------------------------------------
-    def _connect_unsafe(self) -> Any:
+    def _connect_unsafe(self) -> Union[bool, NoReturn]:
         raise NotImplementedError()
 
-    def _login_unsafe(self) -> Any:
+    def _login_unsafe(self) -> Union[bool, NoReturn]:
         raise NotImplementedError()
 
-    def _send_unsafe(self) -> None:
+    def _send_unsafe(self) -> Union[bool, NoReturn]:
         raise NotImplementedError()
 
 

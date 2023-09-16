@@ -33,14 +33,18 @@ class AlertSmtp(AlertsBase):
     RECIPIENT: str = None
 
     # CONNECT =========================================================================================================
-    def _connect_unsafe(self) -> Any:
-        return smtplib.SMTP_SSL(self.SMTP_SERVER.ADDR, self.SMTP_SERVER.PORT, timeout=5)
+    def _connect_unsafe(self) -> Union[bool, NoReturn]:
+        self._conn = smtplib.SMTP_SSL(self.SMTP_SERVER.ADDR, self.SMTP_SERVER.PORT, timeout=5)
+        return True
 
-    def _login_unsafe(self) -> Any:
-        return self._conn.login(self.AUTH_USER, self.AUTH_PWD)
+    def _login_unsafe(self) -> Union[bool, NoReturn]:
+        response = self._conn.login(self.AUTH_USER, self.AUTH_PWD)
+        print(response)
+        print("=" * 100)
+        return response and response[0] in [235, 503]
 
     # MSG =============================================================================================================
-    def _send_unsafe(self) -> Any:
+    def _send_unsafe(self) -> Union[bool, NoReturn]:
         body: Optional[str] = str(self._body or "")
         subj_suffix: Optional[str] = self._subj_suffix or ""
         _subtype: Optional[str] = self._subtype or "plain"
@@ -51,13 +55,12 @@ class AlertSmtp(AlertsBase):
         msg['Subject'] = f"{self.SUBJECT_PREFIX}{subj_suffix}"
         msg.attach(MIMEText(body, _subtype=_subtype))
 
-        self.MSG = msg
-
         print("Try", "-" * 80)
-        print(self.MSG)
+        print(msg)
         print("Try", "-" * 80)
 
-        return self._conn.send_message(msg)
+        result = self._conn.send_message(msg)
+        return True
 
 
 # =====================================================================================================================
