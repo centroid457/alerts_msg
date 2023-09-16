@@ -29,6 +29,8 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
     _conn: Union[None, smtplib.SMTP_SSL, telebot.TeleBot] = None
     _result: Optional[bool] = None   # None-in process, False - finished UnSuccess, True - finished success!
 
+    MSG: Any = None
+
     def __init__(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None):
         super().__init__(daemon=True)
 
@@ -96,7 +98,33 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
         return result
 
     def run(self) -> None:
-        self._send()
+        """
+        result see in self._result
+        :return:
+        """
+        counter = 0
+        while not self._conn_check_exists() and counter <= self.RECONNECT_LIMIT:
+            counter += 1
+            if not self._connect():
+                print(f"[WARNING]try [{counter=}]")
+                print("=" * 100)
+                print()
+                time.sleep(self.TIMEOUT_RECONNECT)
+
+        if self._conn_check_exists():
+            try:
+                print(self._send_unsafe())
+            except Exception as exx:
+                msg = f"[CRITICAL]unexpected [{exx!r}]"
+                print(msg)
+                self._clear()
+                self._result = False
+                return
+
+            print(f"[OK] msg send!")
+            print()
+
+            self._result = True
 
     # OVERWRITE -------------------------------------------------------------------------------------------------------
     def _connect_unsafe(self) -> Any:
@@ -105,7 +133,7 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
     def _login_unsafe(self) -> Any:
         raise NotImplementedError()
 
-    def _send(self) -> None:
+    def _send_unsafe(self) -> None:
         raise NotImplementedError()
 
 

@@ -40,16 +40,10 @@ class AlertSmtp(AlertsBase):
         return self._conn.login(self.AUTH_USER, self.AUTH_PWD)
 
     # MSG =============================================================================================================
-    def _send(self) -> None:
-        """
-        result see in self._result
-        :return:
-        """
+    def _send_unsafe(self) -> Any:
         body: Optional[str] = str(self._body or "")
         subj_suffix: Optional[str] = self._subj_suffix or ""
         _subtype: Optional[str] = self._subtype or "plain"
-
-        # self._mutex.release()
 
         msg = MIMEMultipart()
         msg["From"] = self.AUTH_USER
@@ -57,29 +51,13 @@ class AlertSmtp(AlertsBase):
         msg['Subject'] = f"{self.SUBJECT_PREFIX}{subj_suffix}"
         msg.attach(MIMEText(body, _subtype=_subtype))
 
-        counter = 0
-        while not self._conn_check_exists() and counter <= self.RECONNECT_LIMIT:
-            counter += 1
-            if not self._connect():
-                print(f"[WARNING]try {counter=}")
-                print("=" * 100)
-                print()
-                time.sleep(self.TIMEOUT_RECONNECT)
+        self.MSG = msg
 
-        if self._conn_check_exists():
-            try:
-                print(self._conn.send_message(msg))
-            except Exception as exx:
-                msg = f"[CRITICAL] unexpected [{exx!r}]"
-                print(msg)
-                self._clear()
-                self._result = False
-                return
+        print("Try", "-" * 80)
+        print(self.MSG)
+        print("Try", "-" * 80)
 
-            print("-"*80)
-            print(msg)
-            print("-"*80)
-            self._result = True
+        return self._conn.send_message(msg)
 
 
 # =====================================================================================================================
