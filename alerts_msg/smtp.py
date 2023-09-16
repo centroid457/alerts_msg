@@ -47,9 +47,9 @@ class AlertSmtp(AlertBase):
 
     @property
     def MSG(self) -> MIMEMultipart:
-        body: str = str(self._body or "")
-        subj_suffix: str = self._subj_suffix or ""
-        _subtype: str = self._subtype or "plain"
+        body: str = self._body
+        subj_suffix: str = self._subj_suffix
+        _subtype: str = self._subtype
 
         msg = MIMEMultipart()
         msg["From"] = self.AUTH.USER

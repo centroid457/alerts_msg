@@ -48,6 +48,7 @@ class AlertBase(_AlertInterface, threading.Thread):     # DONT ADD SINGLETON!!! 
     TIMEOUT_RATELIMIT: int = 600    # when EXX 451, b'Ratelimit exceeded
 
     RECIPIENT: Union[str, int] = None   #leave None if selfSending!
+    TIMESTAMP_USE: bool = True
 
     _conn: Union[None, smtplib.SMTP_SSL, telebot.TeleBot] = None
     _result: Optional[bool] = None   # None-in process, False - finished UnSuccess, True - finished success!
@@ -57,10 +58,15 @@ class AlertBase(_AlertInterface, threading.Thread):     # DONT ADD SINGLETON!!! 
 
         # self._mutex: threading.Lock = threading.Lock()
         self.RECIPIENT = self.RECIPIENT or self.AUTH.USER
+        self.TIMESTAMP: str = time.strftime("%Y.%m.%d %H:%M:%S")
+
+        body = str(body or "")
+        if self.TIMESTAMP_USE:
+            body += f"\n{self.TIMESTAMP}"
 
         self._body: Optional[str] = body
-        self._subj_suffix: Optional[str] = subj_suffix
-        self._subtype: Optional[str] = _subtype
+        self._subj_suffix: Optional[str] = subj_suffix or ""
+        self._subtype: Optional[str] = _subtype or "plain"
 
         if body:
             self.start()
@@ -86,8 +92,6 @@ class AlertBase(_AlertInterface, threading.Thread):     # DONT ADD SINGLETON!!! 
 
     def _connect(self) -> Optional[bool]:
         result = None
-        response = None
-
         if not self._conn_check_exists():
             print(f"TRY _connect {self.__class__.__name__}")
             try:
@@ -111,7 +115,6 @@ class AlertBase(_AlertInterface, threading.Thread):     # DONT ADD SINGLETON!!! 
         print("="*100)
         print("="*100)
         print()
-        result = True
 
         return result
 
