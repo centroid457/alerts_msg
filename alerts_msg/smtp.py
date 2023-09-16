@@ -12,8 +12,9 @@ from private_values import *
 
 # =====================================================================================================================
 # TODO: cant solve not to use always connecting - tried many variants!
-# make decition - use only one ability to send - only by instantiating!
+# make decision - use only one ability to send - only by instantiating!
 # always will connecting! but always in threads! so dont mind!
+
 
 # =====================================================================================================================
 class SmtpAddress(NamedTuple):
@@ -26,13 +27,12 @@ class SmtpServers:
 
 
 # =====================================================================================================================
-class AlertSmtp(AlertsBase):
+class AlertSmtp(AlertBase):
     AUTH_USER: str = PrivateEnv.get("SMTP_USER")    # example@mail.ru
     AUTH_PWD: str = PrivateEnv.get("SMTP_PWD")     # use thirdPartyPwd!
     SERVER_SMTP: SmtpAddress = SmtpServers.MAIL_RU
     RECIPIENT: str = None
 
-    # CONNECT =========================================================================================================
     def _connect_unsafe(self) -> Union[bool, NoReturn]:
         self._conn = smtplib.SMTP_SSL(self.SERVER_SMTP.ADDR, self.SERVER_SMTP.PORT, timeout=5)
         return True
@@ -43,8 +43,12 @@ class AlertSmtp(AlertsBase):
         print("=" * 100)
         return response and response[0] in [235, 503]
 
-    # MSG =============================================================================================================
     def _send_unsafe(self) -> Union[bool, NoReturn]:
+        self._conn.send_message(self.MSG)
+        return True
+
+    @property
+    def MSG(self) -> MIMEMultipart:
         body: str = str(self._body or "")
         subj_suffix: str = self._subj_suffix or ""
         _subtype: str = self._subtype or "plain"
@@ -54,13 +58,7 @@ class AlertSmtp(AlertsBase):
         msg["To"] = self.RECIPIENT
         msg['Subject'] = f"{self.SUBJECT_PREFIX}{subj_suffix}"
         msg.attach(MIMEText(body, _subtype=_subtype))
-
-        print("Try", "-" * 80)
-        print(msg)
-        print("Try", "-" * 80)
-
-        result = self._conn.send_message(msg)
-        return True
+        return msg
 
 
 # =====================================================================================================================

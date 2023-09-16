@@ -1,20 +1,44 @@
 import time
 from typing import *
+import abc
 
 import threading
 
 import smtplib
 import telebot
-
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 from private_values import *
-from singleton_meta import *
 
 
 # =====================================================================================================================
-class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WORK!!! and calling logic will be not simle!
+class _AlertInterface(abc.ABC):
+    """
+    if some method dont exists (like for telegram) - return True!
+    Dont return None!
+    Dont use Try sentences inside - it will be applied in upper logic!
+    Decide inside if it was success or not, and return conclusion True/False only.
+    """
+    @abc.abstractmethod
+    def _connect_unsafe(self) -> Union[bool, NoReturn]:
+        pass
+
+    @abc.abstractmethod
+    def _login_unsafe(self) -> Union[bool, NoReturn]:
+        pass
+
+    @abc.abstractmethod
+    def _send_unsafe(self) -> Union[bool, NoReturn]:
+        pass
+
+    @property
+    @abc.abstractmethod
+    def MSG(self) -> Union[str, MIMEMultipart]:
+        pass
+
+
+# =====================================================================================================================
+class AlertBase(_AlertInterface, threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WORK!!! and calling logic will be not simle!
     SUBJECT_PREFIX: Optional[str] = "[ALERT]"
 
     AUTH_USER: str = None
@@ -106,6 +130,10 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
                 print()
                 time.sleep(self.TIMEOUT_RECONNECT)
 
+        print("[Try send", "-" * 80)
+        print(self.MSG())
+        print("Try send]", "-" * 80)
+
         if self._conn_check_exists():
             try:
                 result = self._send_unsafe()
@@ -116,24 +144,13 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
                 msg = f"[CRITICAL]unexpected [{exx!r}]"
                 print(msg)
                 self._clear()
-                return
 
-            print()
-            print()
-            print()
+        print()
+        print()
+        print()
 
         if self._result is None:
             self._result = False
-
-    # OVERWRITE -------------------------------------------------------------------------------------------------------
-    def _connect_unsafe(self) -> Union[bool, NoReturn]:
-        raise NotImplementedError()
-
-    def _login_unsafe(self) -> Union[bool, NoReturn]:
-        raise NotImplementedError()
-
-    def _send_unsafe(self) -> Union[bool, NoReturn]:
-        raise NotImplementedError()
 
 
 # =====================================================================================================================
