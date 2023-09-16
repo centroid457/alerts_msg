@@ -10,46 +10,50 @@ from alerts_msg import *
 
 
 # =====================================================================================================================
-def test__send_single():
-    assert AlertSmtp("single").result_wait() is True
+class Test:
+    @pytest.mark.parametrize(argnames="victim", argvalues=[AlertSmtp, AlertTelegram])
+    def test__send_single(self, victim):
+        assert victim("single").result_wait() is True
 
-@pytest.mark.parametrize(argnames="subj_suffix, body, _subtype", argvalues=[
-    (None, "zero", None),
-    ("", "plain123", "plain123"),
-    ("plain", "plain", "plain"),
-    ("html", "<p><font color='red'>html(red)</font></p>", "html")
-])
-def test__send_single__parametrized(subj_suffix, body, _subtype):
-    assert AlertSmtp(subj_suffix=subj_suffix, body=body, _subtype=_subtype).result_wait() is True
+    @pytest.mark.parametrize(argnames="subj_suffix, body, _subtype", argvalues=[
+        (None, "zero", None),
+        ("", "plain123", "plain123"),
+        ("plain", "plain", "plain"),
+        ("html", "<p><font color='red'>html(red)</font></p>", "html")
+    ])
+    def test__send_single__parametrized(self, subj_suffix, body, _subtype):
+        assert AlertSmtp(subj_suffix=subj_suffix, body=body, _subtype=_subtype).result_wait() is True
 
+    @pytest.mark.parametrize(argnames="victim", argvalues=[AlertSmtp, AlertTelegram])
+    def test__send_multy__result_wait(self, victim):
+        assert victim("multy1").result_wait() is True
+        assert victim("multy2").result_wait() is True
 
-def test__send_multy__result_wait():
-    assert AlertSmtp("multy1").result_wait() is True
-    assert AlertSmtp("multy2").result_wait() is True
+    @pytest.mark.parametrize(argnames="victim", argvalues=[AlertSmtp, AlertTelegram])
+    def test__send_multy__wait_join(self, victim):
+        thread1 = victim("thread1")
+        thread2 = victim("thread2")
 
-def test__send_multy__wait_join():
-    thread1 = AlertSmtp("thread1")
-    thread2 = AlertSmtp("thread2")
+        thread1.join()
+        thread2.join()
 
-    thread1.join()
-    thread2.join()
+        assert thread1._result is True
+        assert thread2._result is True
 
-    assert thread1._result is True
-    assert thread2._result is True
+    @pytest.mark.parametrize(argnames="victim", argvalues=[AlertSmtp, AlertTelegram])
+    def test__send_multy_thread__own(self, victim):
+        threads = [
+            victim("thread1"),
+            victim("thread2"),
+            victim("thread3"),
+        ]
 
-def test__send_multy_thread__own():
-    threads = [
-        AlertSmtp("thread1"),
-        AlertSmtp("thread2"),
-        AlertSmtp("thread3"),
-    ]
+        for thread in threads:
+            # need wait all!
+            thread.join()
 
-    for thread in threads:
-        # need wait all!
-        thread.join()
-
-    for thread in threads:
-        assert thread._result is True
+        for thread in threads:
+            assert thread._result is True
 
 
 # =====================================================================================================================
