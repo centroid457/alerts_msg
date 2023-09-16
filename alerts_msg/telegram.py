@@ -25,7 +25,12 @@ class AlertTelegram(AlertsBase):
 
     # MSG ========================================================================================================
     def _send_unsafe(self) -> Union[bool, NoReturn]:
-        self._conn.send_message(chat_id=self.RECIPIENT, text=self._body)
+        body: str = str(self._body or "")
+        subj_suffix: str = self._subj_suffix or ""
+        subj = f"{self.SUBJECT_PREFIX}{subj_suffix}"
+        msg = subj + body
+
+        self._conn.send_message(chat_id=self.RECIPIENT, text=msg)
         return True
 
 
