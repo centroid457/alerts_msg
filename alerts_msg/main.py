@@ -31,15 +31,15 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
     def __init__(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None):
         super().__init__(daemon=True)
 
-        self._mutex: threading.Lock = threading.Lock()
+        # self._mutex: threading.Lock = threading.Lock()
         self.RECIPIENT = self.RECIPIENT or self.AUTH_USER
 
-        self._body: Optional[str] = None
-        self._subj_suffix: Optional[str] = None
-        self._subtype: Optional[str] = None
+        self._body: Optional[str] = body
+        self._subj_suffix: Optional[str] = subj_suffix
+        self._subtype: Optional[str] = _subtype
 
-        if body is not None:
-            self.send(body=body, subj_suffix=subj_suffix, _subtype=_subtype)
+        if body:
+            self.start()
 
     def _conn_check_exists(self) -> bool:
         return self._conn is not None
@@ -61,7 +61,7 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
         return self._result
 
     def _connect(self) -> Optional[bool]:
-        self._mutex.acquire()
+        # self._mutex.acquire()
 
         result = None
         response = None
@@ -91,17 +91,11 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
             print()
             result = True
 
-        self._mutex.release()
+        # self._mutex.release()
         return result
 
-    def send(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None):
-        self._mutex.acquire()
-
-        # save before START thread!
-        self._body: Optional[str] = body or ""
-        self._subj_suffix: Optional[str] = subj_suffix or ""
-        self._subtype: Optional[str] = _subtype or "plain"
-        self.start()
+    def run(self):
+        self._send()
 
     # OVERWRITE -------------------------------------------------------------------------------------------------------
     def _connect_unsafe(self) -> Any:
@@ -110,7 +104,7 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
     def _login_unsafe(self) -> Any:
         raise NotImplementedError()
 
-    def run(self):  #ACTUAL SENDING! WO PARAMS!!!
+    def _send(self):
         raise NotImplementedError()
 
 

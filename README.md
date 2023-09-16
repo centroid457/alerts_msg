@@ -91,3 +91,17 @@ class AlertSmtpMOD(AlertSmtp):
 
 AlertSmtpMOD(subj_suffix="Hello", body="World!")
 ```
+
+#### 5. using in class with saving alert object
+```python
+from alerts_msg import *
+
+class AlertSmtpMOD(AlertSmtp):
+    pass    # changed
+
+class MyMonitor:
+    ALERT = AlertSmtpMOD
+
+monitor = MyMonitor()
+monitor.ALERT("Hello")
+```

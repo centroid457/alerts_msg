@@ -39,15 +39,14 @@ class AlertSmtp(AlertsBase):
         return self._conn.login(self.AUTH_USER, self.AUTH_PWD)
 
     # MSG =============================================================================================================
-    def run(self):
+    def _send(self):
         self._result = False
 
-        # load in thread to release attrs in object - so we can use next thread!!!
-        body: Optional[str] = str(self._body)
-        subj_suffix: Optional[str] = self._subj_suffix
-        _subtype: Optional[str] = self._subtype
+        body: Optional[str] = str(self._body or "")
+        subj_suffix: Optional[str] = self._subj_suffix or ""
+        _subtype: Optional[str] = self._subtype or "plain"
 
-        self._mutex.release()
+        # self._mutex.release()
 
         msg = MIMEMultipart()
         msg["From"] = self.AUTH_USER
