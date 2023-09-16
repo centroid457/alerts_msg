@@ -28,17 +28,15 @@ class SmtpServers:
 
 # =====================================================================================================================
 class AlertSmtp(AlertBase):
-    AUTH_USER: str = PrivateEnv.get("SMTP_USER")    # example@mail.ru
-    AUTH_PWD: str = PrivateEnv.get("SMTP_PWD")     # use thirdPartyPwd!
+    AUTH: PrivateJsonAuth = PrivateJsonAuth().get_section("AUTH_EMAIL")
     SERVER_SMTP: SmtpAddress = SmtpServers.MAIL_RU
-    RECIPIENT: str = None
 
     def _connect_unsafe(self) -> Union[bool, NoReturn]:
         self._conn = smtplib.SMTP_SSL(self.SERVER_SMTP.ADDR, self.SERVER_SMTP.PORT, timeout=5)
         return True
 
     def _login_unsafe(self) -> Union[bool, NoReturn]:
-        response = self._conn.login(self.AUTH_USER, self.AUTH_PWD)
+        response = self._conn.login(self.AUTH.USER, self.AUTH.PWD)
         print(response)
         print("=" * 100)
         return response and response[0] in [235, 503]
@@ -54,7 +52,7 @@ class AlertSmtp(AlertBase):
         _subtype: str = self._subtype or "plain"
 
         msg = MIMEMultipart()
-        msg["From"] = self.AUTH_USER
+        msg["From"] = self.AUTH.USER
         msg["To"] = self.RECIPIENT
         msg['Subject'] = f"{self.SUBJECT_PREFIX}{subj_suffix}"
         msg.attach(MIMEText(body, _subtype=_subtype))

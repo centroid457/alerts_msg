@@ -52,8 +52,7 @@ from alerts_msg import *
 
 
 class AlertSmtpMOD(AlertSmtp):
-    AUTH_USER: str = "example@mail.ru"
-    AUTH_PWD: str = PrivateEnv.get("myCustomPrivateEnvName")
+    AUTH: PrivateJsonAuth = PrivateJsonAuth().get_section("AUTH_EMAIL_MOD")
 ```
 
 #### 3. change other settings (see source for other not mentioned)
