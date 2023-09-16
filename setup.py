@@ -11,12 +11,10 @@ with open("README.md", "r") as f:
 NAME = "alerts_msg"
 
 setup(
-  version="0.0.2",
-  description="All abilities to send alert msgs (threading)",
-  keywords=["smtp", "mail", "email", "alerts", "notifications", "email alerts"],
+  version="0.1.0",
+  description="All abilities (mail/telegram) to send alert msgs (threading)",
+  keywords=["alerts", "notifications", "email alerts", "smtp", "mail", "email", "telegram"],
   classifiers=[
-    # "Framework :: AsyncIO",
-    "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Communications",
     "Topic :: Communications :: Email",
 
@@ -26,7 +24,9 @@ setup(
     # EDIT ============================================================================================================
     # EDIT ============================================================================================================
 
-    # "Development Status :: 5 - Production/Stable",
+    # "Framework :: AsyncIO",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Development Status :: 5 - Production/Stable",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
