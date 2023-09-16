@@ -13,7 +13,11 @@ NAME = "alerts_msg"
 setup(
   version="0.1.0",
   description="All abilities (mail/telegram) to send alert msgs (threading)",
-  keywords=["alerts", "notifications", "email alerts", "smtp", "mail", "email", "telegram"],
+  keywords=[
+      "alerts", "notifications",
+      "email alerts", "smtp", "mail", "email",
+      "telegram alerts", "telegram",
+  ],
   classifiers=[
     "Topic :: Communications",
     "Topic :: Communications :: Email",
