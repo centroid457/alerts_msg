@@ -40,11 +40,13 @@ See tests and source for other examples.
 ```python
 from alerts_msg import *
 
+
 class SmtpServersMOD(SmtpServers):
     EXAMPLE_RU: SmtpAddress = SmtpAddress("smtp.EXAMPLE.ru", 123)
 
+
 class AlertSmtpMOD(AlertSmtp):
-    SERVER: SmtpAddress = SmtpServersMOD.EXAMPLE_RU   # or direct =SmtpAddress("smtp.EXAMPLE.ru", 123)
+    SMTP_SERVER: SmtpAddress = SmtpServersMOD.EXAMPLE_RU  # or direct =SmtpAddress("smtp.EXAMPLE.ru", 123)
 ```
 
 #### 2. change authorisation data (see module `private_values` for details)

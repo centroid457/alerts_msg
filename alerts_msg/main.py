@@ -4,6 +4,8 @@ from typing import *
 import threading
 
 import smtplib
+import telebot
+
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -17,16 +19,15 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
 
     AUTH_USER: str = None
     AUTH_PWD: str = None
-    SERVER: Any = None
 
     RECONNECT_LIMIT: int = 10
     TIMEOUT_RECONNECT: int = 60
     TIMEOUT_RATELIMIT: int = 600    # when EXX 451, b'Ratelimit exceeded
 
-    RECIPIENT: str = None   #leave None if selfSending!
+    RECIPIENT: Union[str, int] = None   #leave None if selfSending!
 
-    _conn: Union[None, smtplib.SMTP_SSL] = None
-    _result: Optional[bool] = None   # careful!
+    _conn: Union[None, smtplib.SMTP_SSL, telebot.TeleBot] = None
+    _result: Optional[bool] = None   # None-in process, False - finished UnSuccess, True - finished success!
 
     def __init__(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None):
         super().__init__(daemon=True)
@@ -94,7 +95,7 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
         # self._mutex.release()
         return result
 
-    def run(self):
+    def run(self) -> None:
         self._send()
 
     # OVERWRITE -------------------------------------------------------------------------------------------------------
@@ -104,7 +105,7 @@ class AlertsBase(threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WO
     def _login_unsafe(self) -> Any:
         raise NotImplementedError()
 
-    def _send(self):
+    def _send(self) -> None:
         raise NotImplementedError()
 
 

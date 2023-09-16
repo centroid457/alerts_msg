@@ -29,19 +29,22 @@ class SmtpServers:
 class AlertSmtp(AlertsBase):
     AUTH_USER: str = PrivateEnv.get("SMTP_USER")    # example@mail.ru
     AUTH_PWD: str = PrivateEnv.get("SMTP_PWD")     # use thirdPartyPwd!
-    SERVER: SmtpAddress = SmtpServers.MAIL_RU
+    SMTP_SERVER: SmtpAddress = SmtpServers.MAIL_RU
+    RECIPIENT: str = None
 
     # CONNECT =========================================================================================================
     def _connect_unsafe(self) -> Any:
-        return smtplib.SMTP_SSL(self.SERVER.ADDR, self.SERVER.PORT, timeout=5)
+        return smtplib.SMTP_SSL(self.SMTP_SERVER.ADDR, self.SMTP_SERVER.PORT, timeout=5)
 
     def _login_unsafe(self) -> Any:
         return self._conn.login(self.AUTH_USER, self.AUTH_PWD)
 
     # MSG =============================================================================================================
-    def _send(self):
-        self._result = False
-
+    def _send(self) -> None:
+        """
+        result see in self._result
+        :return:
+        """
         body: Optional[str] = str(self._body or "")
         subj_suffix: Optional[str] = self._subj_suffix or ""
         _subtype: Optional[str] = self._subtype or "plain"
@@ -70,6 +73,7 @@ class AlertSmtp(AlertsBase):
                 msg = f"[CRITICAL] unexpected [{exx!r}]"
                 print(msg)
                 self._clear()
+                self._result = False
                 return
 
             print("-"*80)
