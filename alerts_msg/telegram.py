@@ -12,12 +12,12 @@ from singleton_meta import *
 
 # =====================================================================================================================
 class AlertTelegram(AlertsBase):
-    TG_BOTADDRESS: PrivateJsonTgBotAddress = PrivateJsonTgBotAddress().get_section("TGBOT1")
+    SERVER_TG: PrivateJsonTgBotAddress = PrivateJsonTgBotAddress().get_section("TGBOT1")
     RECIPIENT: int = PrivateJson().get("MyTgID")
 
     # CONNECT =========================================================================================================
     def _connect_unsafe(self) -> Union[bool, NoReturn]:
-        self._conn = telebot.TeleBot(token=self.TG_BOTADDRESS.TOKEN)
+        self._conn = telebot.TeleBot(token=self.SERVER_TG.TOKEN)
         return True
 
     def _login_unsafe(self) -> Union[bool, NoReturn]:

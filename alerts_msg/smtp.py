@@ -29,12 +29,12 @@ class SmtpServers:
 class AlertSmtp(AlertsBase):
     AUTH_USER: str = PrivateEnv.get("SMTP_USER")    # example@mail.ru
     AUTH_PWD: str = PrivateEnv.get("SMTP_PWD")     # use thirdPartyPwd!
-    SMTP_SERVER: SmtpAddress = SmtpServers.MAIL_RU
+    SERVER_SMTP: SmtpAddress = SmtpServers.MAIL_RU
     RECIPIENT: str = None
 
     # CONNECT =========================================================================================================
     def _connect_unsafe(self) -> Union[bool, NoReturn]:
-        self._conn = smtplib.SMTP_SSL(self.SMTP_SERVER.ADDR, self.SMTP_SERVER.PORT, timeout=5)
+        self._conn = smtplib.SMTP_SSL(self.SERVER_SMTP.ADDR, self.SERVER_SMTP.PORT, timeout=5)
         return True
 
     def _login_unsafe(self) -> Union[bool, NoReturn]:

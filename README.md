@@ -33,6 +33,7 @@ See tests and source for other examples.
 ### AlertSmtp
 
 #### 1. add new server if not exists
+
 ```python
 from alerts_msg import *
 
@@ -42,7 +43,7 @@ class SmtpServersMOD(SmtpServers):
 
 
 class AlertSmtpMOD(AlertSmtp):
-    SMTP_SERVER: SmtpAddress = SmtpServersMOD.EXAMPLE_RU  # or direct =SmtpAddress("smtp.EXAMPLE.ru", 123)
+    SERVER_SMTP: SmtpAddress = SmtpServersMOD.EXAMPLE_RU  # or direct =SmtpAddress("smtp.EXAMPLE.ru", 123)
 ```
 
 #### 2. change authorisation data (see `private_values` for details)
@@ -104,7 +105,7 @@ monitor.ALERT("Hello")
 All idea is similar to AlertSmtp.
 
 * add auth data  
-add pv.json (for details see private_values.PrivateJsonTgBotAddress)
+add pv.json or do smth else (for details see private_values.PrivateJsonTgBotAddress)
 ```json
 {
     "MyTgID": 1234567890,
