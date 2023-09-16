@@ -45,9 +45,9 @@ class AlertSmtp(AlertsBase):
 
     # MSG =============================================================================================================
     def _send_unsafe(self) -> Union[bool, NoReturn]:
-        body: Optional[str] = str(self._body or "")
-        subj_suffix: Optional[str] = self._subj_suffix or ""
-        _subtype: Optional[str] = self._subtype or "plain"
+        body: str = str(self._body or "")
+        subj_suffix: str = self._subj_suffix or ""
+        _subtype: str = self._subtype or "plain"
 
         msg = MIMEMultipart()
         msg["From"] = self.AUTH_USER
