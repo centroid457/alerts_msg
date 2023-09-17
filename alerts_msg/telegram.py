@@ -10,7 +10,7 @@ from private_values import *
 
 # =====================================================================================================================
 class AlertTelegram(AlertBase):
-    SERVER_TG: PrivateJsonTgBotAddress = PrivateJsonTgBotAddress().get_section("TGBOT1")
+    SERVER_TG: PrivateJsonTgBotAddress = PrivateJsonTgBotAddress().get_section("TGBOTDEF")
     RECIPIENT: int = PrivateJson().get("MyTgID")
 
     def _connect_unsafe(self) -> Union[bool, NoReturn]:

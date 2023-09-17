@@ -108,7 +108,7 @@ add pv.json or do smth else (for details see private_values.PrivateJsonTgBotAddr
 ```json
 {
     "MyTgID": 1234567890,
-    "TGBOT1": {
+    "TGBOTDEF": {
         "LINK_ID": "@my_bot_20230916",
         "NAME": "my_bot",
         "TOKEN": "9876543210xxxxxxxxxxxxxxxxxxxxxxxxx"
