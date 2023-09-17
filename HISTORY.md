@@ -1,11 +1,15 @@
 Release History
 ===============
 
+0.1.5 (2023-09-17)
+-------------------
+**NEW**
+- add SUBJECT_SUFFIX_DEF
+
 0.1.4 (2023-09-17)
 -------------------
 **CHANGE**
 - used TGBOTDEF section in pv.json for default bot
-
 
 0.1.3 (2023-09-16)
 -------------------
