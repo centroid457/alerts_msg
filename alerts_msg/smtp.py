@@ -28,7 +28,7 @@ class SmtpServers:
 
 # =====================================================================================================================
 class AlertSmtp(AlertBase):
-    AUTH: PrivateJsonAuth = PrivateJsonAuth().get_section("AUTH_EMAIL")
+    AUTH: PrivateJsonAuth = PrivateJsonAuth().get_section("AUTH_EMAIL_DEF")
     SERVER_SMTP: SmtpAddress = SmtpServers.MAIL_RU
 
     def _connect_unsafe(self) -> Union[bool, NoReturn]:
