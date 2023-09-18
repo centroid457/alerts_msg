@@ -1,6 +1,11 @@
 Release History
 ===============
 
+0.1.7 (2023-09-18)
+-------------------
+**CHANGE**
+- change default sections to *_DEF
+
 0.1.6 (2023-09-18)
 -------------------
 **CHANGE**
