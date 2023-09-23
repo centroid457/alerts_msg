@@ -10,8 +10,8 @@ from private_values import *
 
 # =====================================================================================================================
 class AlertTelegram(AlertBase):
-    SERVER_TG: PrivateJsonTgBotAddress = PrivateJsonTgBotAddress().get_section("TGBOT_DEF")
-    RECIPIENT: int = PrivateJson().get("MyTgID")
+    SERVER_TG: PrivateTgBotAddressJson = PrivateTgBotAddressJson(_section="TGBOT_DEF")
+    RECIPIENT: int = PrivateJson()["MyTgID"]
 
     def _connect_unsafe(self) -> Union[bool, NoReturn]:
         self._conn = telebot.TeleBot(token=self.SERVER_TG.TOKEN)
