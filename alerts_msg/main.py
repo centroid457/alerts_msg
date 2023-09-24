@@ -42,7 +42,7 @@ class AlertBase(_AlertInterface, threading.Thread):     # DONT ADD SINGLETON!!! 
     SUBJECT_PREFIX: Optional[str] = "[ALERT]"
     SUBJECT_SUFFIX_DEF: Optional[str] = ""
 
-    AUTH: PrivateAuthJson = None
+    AUTH: PrivateAuto = None
 
     RECONNECT_LIMIT: int = 10
     TIMEOUT_RECONNECT: int = 60
