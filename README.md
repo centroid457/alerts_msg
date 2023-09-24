@@ -52,7 +52,7 @@ from alerts_msg import *
 
 
 class AlertSmtpMOD(AlertSmtp):
-    AUTH: PrivateJsonAuth = PrivateJsonAuth().get_section("AUTH_EMAIL_MOD")
+    AUTH: PrivateAuto = PrivateAuto(_section="AUTH_EMAIL_MOD")
 ```
 
 #### 3. change other settings (see source for other not mentioned)
@@ -107,7 +107,7 @@ All idea is similar to AlertSmtp.
 add pv.json or do smth else (for details see private_values.PrivateJsonTgBotAddress)
 ```json
 {
-    "MyTgID": 1234567890,
+    "TG_ID": {"MyTgID": 1234567890},
     "TGBOT_DEF": {
         "LINK_ID": "@my_bot_20230916",
         "NAME": "my_bot",
