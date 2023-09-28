@@ -49,9 +49,20 @@ class Test:
             victim("thread3"),
         ]
 
+        victim.threads_wait_all()
+
         for thread in threads:
-            # need wait all!
-            thread.join()
+            assert thread._result is True
+
+    def test__threads_wait_all(self):
+        threads = [
+            AlertTelegram("thread1"),
+            AlertTelegram("thread2"),
+            AlertTelegram("thread3"),
+            AlertTelegram("thread4"),
+        ]
+
+        AlertTelegram.threads_wait_all()
 
         for thread in threads:
             assert thread._result is True

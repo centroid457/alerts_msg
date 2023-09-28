@@ -54,8 +54,13 @@ class AlertBase(_AlertInterface, threading.Thread):     # DONT ADD SINGLETON!!! 
     _conn: Union[None, smtplib.SMTP_SSL, telebot.TeleBot] = None
     _result: Optional[bool] = None   # None-in process, False - finished UnSuccess, True - finished success!
 
+    _threads_active: Set['AlertBase'] = set()
+
+    # =================================================================================================================
     def __init__(self, body: Optional[str] = None, subj_suffix: Optional[str] = None, _subtype: Optional[str] = None):
         super().__init__(daemon=True)
+
+        self._thread_started()
 
         # self._mutex: threading.Lock = threading.Lock()
         self.RECIPIENT = self.RECIPIENT or self.AUTH.USER
@@ -72,6 +77,23 @@ class AlertBase(_AlertInterface, threading.Thread):     # DONT ADD SINGLETON!!! 
         if body:
             self.start()
 
+    # =================================================================================================================
+    def _thread_started(self):
+        self.__class__._threads_active.add(self)
+
+    def _thread_finished(self):
+        self.__class__._threads_active.discard(self)
+
+    @classmethod
+    def threads_wait_all(cls):
+        try:
+            time.sleep(1)
+            while cls._threads_active:
+                list(cls._threads_active)[0].join()
+        except:
+            pass
+
+    # =================================================================================================================
     def _conn_check_exists(self) -> bool:
         return self._conn is not None
 
@@ -119,6 +141,7 @@ class AlertBase(_AlertInterface, threading.Thread):     # DONT ADD SINGLETON!!! 
 
         return result
 
+    # =================================================================================================================
     def run(self) -> None:
         """
         result see in self._result
@@ -154,6 +177,8 @@ class AlertBase(_AlertInterface, threading.Thread):     # DONT ADD SINGLETON!!! 
 
         if self._result is None:
             self._result = False
+
+        self._thread_finished()
 
 
 # =====================================================================================================================
