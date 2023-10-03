@@ -40,7 +40,7 @@ class _AlertInterface(abc.ABC):
 # =====================================================================================================================
 class AlertBase(_AlertInterface, threading.Thread):     # DONT ADD SINGLETON!!! SNMP WILL NOT WORK!!! and calling logic will be not simle!
     SUBJECT_PREFIX: Optional[str] = "[ALERT]"
-    SUBJECT_SUFFIX_DEF: Optional[str] = ""
+    SUBJECT_SUFFIX: Optional[str] = ""
 
     AUTH: PrivateAuto = None
 
@@ -71,7 +71,7 @@ class AlertBase(_AlertInterface, threading.Thread):     # DONT ADD SINGLETON!!! 
             body += f"\n{self.TIMESTAMP}"
 
         self._body: Optional[str] = body
-        self._subj_suffix: Optional[str] = subj_suffix or self.SUBJECT_SUFFIX_DEF or ""
+        self._subj_suffix: Optional[str] = subj_suffix or self.SUBJECT_SUFFIX or ""
         self._subtype: Optional[str] = _subtype or "plain"
 
         if body:

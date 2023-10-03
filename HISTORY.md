@@ -24,7 +24,7 @@ Release History
 0.1.5 (2023-09-17)
 -------------------
 **NEW**
-- add SUBJECT_SUFFIX_DEF
+- add SUBJECT_SUFFIX
 
 0.1.4 (2023-09-17)
 -------------------
