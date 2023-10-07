@@ -30,6 +30,17 @@ from alerts_msg import *
 ## GUIDE
 See tests and source for other examples.
 
+### 0. BEST PRACTICE
+```python
+from alerts_msg import *
+
+class AlertADX(AlertSelect.TELEGRAM_DEF):
+    pass
+
+AlertADX("hello")
+```
+
+
 ### AlertSmtp
 
 #### 1. add new server if not exists
@@ -56,11 +67,13 @@ class AlertSmtpMOD(AlertSmtp):
 ```
 
 #### 3. change other settings (see source for other not mentioned)
+
 ```python
 from alerts_msg import *
 
+
 class AlertSmtpMOD(AlertSmtp):
-    TIMEOUT_RECONNECT: int = 60
+    RECONNECT_PAUSE: int = 60
     RECONNECT_LIMIT: int = 10
 
     TIMEOUT_RATELIMIT: int = 600
@@ -70,20 +83,24 @@ class AlertSmtpMOD(AlertSmtp):
 
 #### 4. send
 * if no mods
+
 ```python
 from alerts_msg import *
 
-AlertSmtp(subj_suffix="Hello", body="World!")
+AlertSmtp(_subj_name="Hello", body="World!")
 ```
 
 * with mods
+
 ```python
 from alerts_msg import *
 
-class AlertSmtpMOD(AlertSmtp):
-    pass    # changed
 
-AlertSmtpMOD(subj_suffix="Hello", body="World!")
+class AlertSmtpMOD(AlertSmtp):
+    pass  # changed
+
+
+AlertSmtpMOD(_subj_name="Hello", body="World!")
 ```
 
 #### 5. using in class with saving alert object

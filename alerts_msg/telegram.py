@@ -32,11 +32,7 @@ class AlertTelegram(AlertBase):
 
     @property
     def MSG(self) -> str:
-        body: str = self._body
-        subj_suffix: str = self._subj_suffix or ""
-        subj = f"{self.SUBJECT_PREFIX}{subj_suffix}"
-
-        msg = f"{subj}\n{body}"
+        msg = f"{self.SUBJECT}\n{self.body}"
         return msg
 
 

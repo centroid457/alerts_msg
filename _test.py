@@ -16,14 +16,14 @@ class Test:
         assert victim("single").result_wait() is True
 
     @pytest.mark.parametrize(argnames="victim", argvalues=[AlertSmtp, AlertTelegram])
-    @pytest.mark.parametrize(argnames="subj_suffix, body, _subtype", argvalues=[
+    @pytest.mark.parametrize(argnames="_subj_name, body, _subtype", argvalues=[
         (None, "zero", None),
         ("", "plain123", "plain123"),
         ("plain", "plain", "plain"),
         ("html", "<p><font color='red'>html(red)</font></p>", "html")
     ])
-    def test__send_single__parametrized(self, victim, subj_suffix, body, _subtype):
-        assert victim(subj_suffix=subj_suffix, body=body, _subtype=_subtype).result_wait() is True
+    def test__send_single__parametrized(self, victim, _subj_name, body, _subtype):
+        assert victim(_subj_name=_subj_name, body=body, _subtype=_subtype).result_wait() is True
 
     @pytest.mark.parametrize(argnames="victim", argvalues=[AlertSmtp, AlertTelegram])
     def test__send_multy__result_wait(self, victim):

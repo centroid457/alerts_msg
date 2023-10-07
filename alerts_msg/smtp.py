@@ -47,15 +47,11 @@ class AlertSmtp(AlertBase):
 
     @property
     def MSG(self) -> MIMEMultipart:
-        body: str = self._body
-        subj_suffix: str = self._subj_suffix
-        _subtype: str = self._subtype
-
         msg = MIMEMultipart()
         msg["From"] = self.AUTH.USER
         msg["To"] = self.RECIPIENT
-        msg['Subject'] = f"{self.SUBJECT_PREFIX}{subj_suffix}"
-        msg.attach(MIMEText(body, _subtype=_subtype))
+        msg['Subject'] = self.SUBJECT
+        msg.attach(MIMEText(self.body, _subtype=self._subtype))
         return msg
 
 
