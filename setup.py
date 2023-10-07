@@ -11,7 +11,7 @@ with open("README.md", "r") as f:
 NAME = "alerts_msg"
 
 setup(
-  version="0.1.9",
+  version="0.2.0",
   description="All abilities (mail/telegram) to send alert msgs (threading)",
   keywords=[
       "alerts", "notifications",

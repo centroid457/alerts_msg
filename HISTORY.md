@@ -3,6 +3,7 @@ Release History
 
 0.2.0 (2023-10-07)
 -------------------
+Great ref!
 **NEW**
 - use classname if no suffix_subj
 
