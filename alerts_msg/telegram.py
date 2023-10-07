@@ -9,15 +9,21 @@ from private_values import *
 
 
 # =====================================================================================================================
-class PrivateTgID(PrivateAuto):
+class RecipientTgID(PrivateAuto):
+    """Object to get telegram RecipientId
+    """
     SECTION = "TG_ID"
     MyTgID: str
 
 
 # =====================================================================================================================
 class AlertTelegram(AlertBase):
+    """realisation for sending Telegeam msg.
+
+    :ivar AUTH: object with USER/PWD attributes for authorisation
+    :ivar SERVER_SMTP: SmtpAddress object
+    """
     SERVER_TG: PrivateTgBotAddressAuto = PrivateTgBotAddressAuto(_section="TGBOT_DEF")
-    RECIPIENT: int = PrivateTgID().MyTgID
 
     def _connect_unsafe(self) -> Union[bool, NoReturn]:
         self._conn = telebot.TeleBot(token=self.SERVER_TG.TOKEN)
@@ -34,6 +40,10 @@ class AlertTelegram(AlertBase):
     def MSG(self) -> str:
         msg = f"{self.SUBJECT}\n{self.body}"
         return msg
+
+    @property
+    def RECIPIENT_SELF(self) -> str:
+        return RecipientTgID().MyTgID
 
 
 # =====================================================================================================================

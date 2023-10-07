@@ -16,6 +16,19 @@ class Test:
         assert victim("single").result_wait() is True
 
     @pytest.mark.parametrize(argnames="victim", argvalues=[AlertSmtp, AlertTelegram])
+    def test__send_multy_thread(self, victim):
+        threads = [
+            victim("thread1"),
+            victim("thread2"),
+            victim("thread3"),
+        ]
+
+        victim.threads_wait_all()
+
+        for thread in threads:
+            assert thread._result is True
+
+    @pytest.mark.parametrize(argnames="victim", argvalues=[AlertSmtp, AlertTelegram])
     @pytest.mark.parametrize(argnames="_subj_name, body, _subtype", argvalues=[
         (None, "zero", None),
         ("", "plain123", "plain123"),
@@ -40,32 +53,6 @@ class Test:
 
         assert thread1._result is True
         assert thread2._result is True
-
-    @pytest.mark.parametrize(argnames="victim", argvalues=[AlertSmtp, AlertTelegram])
-    def test__send_multy_thread__own(self, victim):
-        threads = [
-            victim("thread1"),
-            victim("thread2"),
-            victim("thread3"),
-        ]
-
-        victim.threads_wait_all()
-
-        for thread in threads:
-            assert thread._result is True
-
-    def test__threads_wait_all(self):
-        threads = [
-            AlertTelegram("thread1"),
-            AlertTelegram("thread2"),
-            AlertTelegram("thread3"),
-            AlertTelegram("thread4"),
-        ]
-
-        AlertTelegram.threads_wait_all()
-
-        for thread in threads:
-            assert thread._result is True
 
 
 # =====================================================================================================================

@@ -38,6 +38,8 @@ class AlertADX(AlertSelect.TELEGRAM_DEF):
     pass
 
 AlertADX("hello")
+AlertADX("World")
+AlertADX.threads_wait_all()
 ```
 
 
@@ -78,7 +80,7 @@ class AlertSmtpMOD(AlertSmtp):
 
     TIMEOUT_RATELIMIT: int = 600
 
-    RECIPIENT: str = "my_address_2@mail.ru"
+    RECIPIENT_SPECIAL: str = "my_address_2@mail.ru"
 ```
 
 #### 4. send

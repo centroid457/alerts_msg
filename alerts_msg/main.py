@@ -12,7 +12,7 @@ from private_values import *
 
 
 # =====================================================================================================================
-# TODO: need rebuild DOCS!!!
+# TODO: need rebuild README!!!
 
 
 # =====================================================================================================================
@@ -50,6 +50,13 @@ class _AlertInterface(abc.ABC):
         """
         pass
 
+    @property
+    @abc.abstractmethod
+    def RECIPIENT_SELF(self) -> str:
+        """RECIPIENT SelfSending, get from obvious class objects!
+        """
+        pass
+
 
 # =====================================================================================================================
 class AlertBase(_AlertInterface, threading.Thread):     # REM: DONT ADD SINGLETON!!! SNMP WILL NOT WORK!!! and calling logic will be not simle!
@@ -70,12 +77,11 @@ class AlertBase(_AlertInterface, threading.Thread):     # REM: DONT ADD SINGLETO
     :ivar BODY_TIMESTAMP_USE: append timestamp into the body
     :ivar TIMESTAMP: initiation timestamp for created instance
 
-    :ivar AUTH: authentication object see PrivateAuto for details (will be redefined in further classes, here is just None)
     :ivar RECONNECT_LIMIT: how many times it will try to reconnect, after - just close object
     :ivar RECONNECT_PAUSE: pause between reconnecting in seconds
 
-    :ivar RECIPIENT: recipient for sending msg
-        None - if selfSending to AUTH.USER!
+    :ivar RECIPIENT_SPECIAL: recipient for sending msg
+        None - if selfSending!
 
     :ivar _conn: actual connection object
     :ivar _result: result for alert state
@@ -93,13 +99,11 @@ class AlertBase(_AlertInterface, threading.Thread):     # REM: DONT ADD SINGLETO
     BODY_TIMESTAMP_USE: bool = True
     TIMESTAMP: str = None
 
-    AUTH: PrivateAuto = None
-
     RECONNECT_LIMIT: int = 10
     RECONNECT_PAUSE: int = 60
     # TIMEOUT_RATELIMIT: int = 600    # when EXX 451, b'Ratelimit exceeded
 
-    RECIPIENT: Union[str, int] = None
+    RECIPIENT_SPECIAL: Optional[Any] = None
 
     _conn: Union[None, smtplib.SMTP_SSL, telebot.TeleBot] = None
     _result: Optional[bool] = None
@@ -122,8 +126,6 @@ class AlertBase(_AlertInterface, threading.Thread):     # REM: DONT ADD SINGLETO
         self.SUBJECT_NAME = _subj_name or self.SUBJECT_NAME
         self._subtype = _subtype or self._subtype
 
-        self.RECIPIENT = self.RECIPIENT or self.AUTH.USER
-
         # BODY ---------------
         if body is not None:
             body = str(body)
@@ -134,6 +136,12 @@ class AlertBase(_AlertInterface, threading.Thread):     # REM: DONT ADD SINGLETO
             self.start()
 
     # =================================================================================================================
+    @property
+    def RECIPIENT(self) -> str:
+        """RECIPIENT actual/final
+        """
+        return self.RECIPIENT_SPECIAL or self.RECIPIENT_SELF
+
     @property
     def SUBJECT(self) -> str:
         """final msg subject, composed with name and prefix.

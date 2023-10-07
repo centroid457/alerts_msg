@@ -18,17 +18,31 @@ from private_values import *
 
 # =====================================================================================================================
 class SmtpAddress(NamedTuple):
+    """class for keeping connection parameters/settings for exact smtp server
+
+    :ivar ADDR: smtp server address like "smtp.mail.ru"
+    :ivar PORT: smtp server port like 465
+    """
     ADDR: str
     PORT: int
 
 
 class SmtpServers:
+    """well known servers addresses.
+
+    Here we must collect servers like MilRu/GmailCom, and not to create it in any new project.
+    """
     MAIL_RU: SmtpAddress = SmtpAddress("smtp.mail.ru", 465)
 
 
 # =====================================================================================================================
 class AlertSmtp(AlertBase):
-    AUTH: PrivateAuto = PrivateAuto(_section="AUTH_EMAIL_DEF")
+    """SMTP realisation for sending email msg.
+
+    :ivar AUTH: object with USER/PWD attributes for authorisation (see PrivateAuth/PrivateAuto for details)
+    :ivar SERVER_SMTP: SmtpAddress object
+    """
+    AUTH: PrivateAuth = PrivateAuto(_section="AUTH_EMAIL_DEF")
     SERVER_SMTP: SmtpAddress = SmtpServers.MAIL_RU
 
     def _connect_unsafe(self) -> Union[bool, NoReturn]:
@@ -49,10 +63,14 @@ class AlertSmtp(AlertBase):
     def MSG(self) -> MIMEMultipart:
         msg = MIMEMultipart()
         msg["From"] = self.AUTH.USER
-        msg["To"] = self.RECIPIENT
+        msg["To"] = self.RECIPIENT_SPECIAL or self.AUTH.USER
         msg['Subject'] = self.SUBJECT
         msg.attach(MIMEText(self.body, _subtype=self._subtype))
         return msg
+
+    @property
+    def RECIPIENT_SELF(self) -> str:
+        return self.AUTH.USER
 
 
 # =====================================================================================================================
