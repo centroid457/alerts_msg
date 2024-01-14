@@ -1,62 +1,51 @@
-from setuptools import setup, find_packages
+from setuptools import setup
+from PROJECT import PROJECT
 
+
+# =====================================================================================================================
 with open("README.md", "r") as f:
-  readme = f.read()
+    readme = f.read()
 
-# EDIT ================================================================================================================
-# EDIT ================================================================================================================
-# EDIT ================================================================================================================
-# EDIT ================================================================================================================
-# EDIT ================================================================================================================
-NAME = "alerts_msg"
 
+# =====================================================================================================================
 setup(
-  version="0.2.0",
-  description="All abilities (mail/telegram) to send alert msgs (threading)",
-  keywords=[
-      "alerts", "notifications",
-      "email alerts", "smtp", "mail", "email",
-      "telegram alerts", "telegram",
-  ],
+  version=PROJECT.VERSION_STR,
+  description=PROJECT.DESCRIPTION_SHORT,
+  keywords=PROJECT.KEYWORDS,
   classifiers=[
-    "Topic :: Communications",
-    "Topic :: Communications :: Email",
+    # "Topic :: ________________",
+    *PROJECT.CLASSIFIERS_TOPICS_ADD,
 
-    # EDIT ============================================================================================================
-    # EDIT ============================================================================================================
-    # EDIT ============================================================================================================
-    # EDIT ============================================================================================================
-    # EDIT ============================================================================================================
-
-    # "Framework :: AsyncIO",
+    # "Framework :: ",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Development Status :: 5 - Production/Stable",
+    # "Development Status :: 5 - Production/Stable",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.11",
     "Operating System :: OS Independent",
-    "Environment :: Console",
+    # "Environment :: Console",
     "Intended Audience :: Developers",
     "Natural Language :: English",
     "Typing :: Typed",
   ],
 
-  name=NAME,
-  author="Andrei Starichenko",
-  author_email="centroid@mail.ru",
+  name=PROJECT.NAME_IMPORT,
+  author=PROJECT.AUTHOR_NAME,
+  author_email=PROJECT.AUTHOR_EMAIL,
   long_description=readme,
   long_description_content_type="text/markdown",
 
-  url="https://github.com/centroid457/",  # HOMEPAGE
+  url=PROJECT.AUTHOR_HOMEPAGE,  # HOMEPAGE
   project_urls={
     # "Documentation": f"https://github.com/centroid457/{NAME}/blob/main/GUIDE.md",
-    "Source": f"https://github.com/centroid457/{NAME}",
+    "Source": f"https://github.com/centroid457/{PROJECT.NAME_IMPORT}",
   },
 
-  packages=[NAME, ],
+  packages=[PROJECT.NAME_IMPORT, ],
   install_requires=[],
   python_requires=">=3.6"
 )
+
 
 # =====================================================================================================================
