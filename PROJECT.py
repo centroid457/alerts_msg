@@ -25,7 +25,7 @@ class PROJECT:
     ]
 
     # GIT --------------------------------------------------
-    DESCRIPTION_SHORT: str = "All abilities (mail/telegram) to send alert msgs (threading)",
+    DESCRIPTION_SHORT: str = "All abilities (mail/telegram) to send alert msgs (threading)"
 
     # README -----------------------------------------------
     pass
