@@ -8,8 +8,10 @@ object-info
 
 # ========================================
 # SPECIAL FOR THIS PROJECT ---------------
+PyQt5
 telebot
 private-values
+requests
 
 # ========================================
 

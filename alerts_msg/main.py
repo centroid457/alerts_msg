@@ -1,11 +1,10 @@
 import time
 from typing import *
 
-import threading
+from PyQt5.QtCore import QThread
 
 import smtplib
 import telebot
-# from email.mime.multipart import MIMEMultipart
 
 from private_values import *
 
@@ -51,7 +50,7 @@ class _AlertInterface:
 
 
 # =====================================================================================================================
-class AlertBase(_AlertInterface, threading.Thread):     # REM: DONT ADD SINGLETON!!! SNMP WILL NOT WORK!!! and calling logic will be not simle!
+class AlertBase(_AlertInterface, QThread):     # REM: DONT ADD SINGLETON!!! SNMP WILL NOT WORK!!! and calling logic will be not simle!
     """Base class for Alert objects.
 
     FEATURE:
