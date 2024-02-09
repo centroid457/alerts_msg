@@ -42,13 +42,14 @@ designed for ...
     # HISTORY -----------------------------------------------
     VERSION: Tuple[int, int, int] = (0, 2, 1)
     TODO: List[str] = [
-        "..."
+        "test multyStart by one object"
     ]
     FIXME: List[str] = [
         "..."
     ]
     NEWS: List[str] = [
-        "apply new pypi template/2"
+        "apply new pypi template/2",
+        "ref to QThread! so able to use multy start!"
     ]
 
     # FINALIZE -----------------------------------------------

@@ -2,51 +2,55 @@ from .main import *
 
 import time
 from typing import *
-
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-
-from private_values import *
+import requests
 
 
 # =====================================================================================================================
-# TODO: cant solve not to use always connecting - tried many variants!
-# make decision - use only one ability to send - only by instantiating!
-# always will connecting! but always in threads! so dont mind!
+pass
 
 
 # =====================================================================================================================
-class SmtpAddress(NamedTuple):
-    """class for keeping connection parameters/settings for exact smtp server
-
-    :ivar ADDR: smtp server address like "smtp.mail.ru"
-    :ivar PORT: smtp server port like 465
-    """
+class HttpAddress(NamedTuple):
     ADDR: str
     PORT: int
+    ROUTE: str = ''
 
 
-class SmtpServers:
+class HttpServers:
     """well known servers addresses.
 
     Here we must collect servers like MilRu/GmailCom, and not to create it in any new project.
     """
-    MAIL_RU: SmtpAddress = SmtpAddress("smtp.mail.ru", 465)
+    LIDIA: HttpAddress = HttpAddress("http://192.168.74.20", 8080, "results")
 
 
 # =====================================================================================================================
-class AlertSmtp(AlertBase):
-    """SMTP realisation for sending msg (email).
+class AlertHttp(AlertBase):
+    """HTTP realisation for sending msg (POSTs).
     """
     # SETTINGS ------------------------------------
-    SERVER_SMTP: SmtpAddress = SmtpServers.MAIL_RU
-    AUTH: PrivateAuth = PrivateAuto(_section="AUTH_EMAIL_DEF")
+    SERVER_HTTP: HttpAddress = HttpServers.LIDIA
 
     # AUX -----------------------------------------
-    _conn:  smtplib.SMTP_SSL
+    _conn:  'session'       # TODO: FINISH
 
+    # TODO: FINISH
+    # TODO: FINISH
+    # TODO: FINISH
+    # TODO: FINISH
+    # TODO: FINISH
+    # TODO: FINISH
+    # TODO: FINISH
+    # TODO: FINISH
+    # TODO: FINISH
+    # TODO: FINISH
+    # TODO: FINISH
+    # TODO: FINISH
+    # TODO: FINISH
+    # TODO: FINISH
+    # TODO: FINISH
     def _connect_unsafe(self) -> Union[bool, NoReturn]:
+        """create session ???"""
         self._conn = smtplib.SMTP_SSL(self.SERVER_SMTP.ADDR, self.SERVER_SMTP.PORT, timeout=5)
         return True
 
