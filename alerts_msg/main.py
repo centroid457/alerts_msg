@@ -5,7 +5,7 @@ import threading
 
 import smtplib
 import telebot
-from email.mime.multipart import MIMEMultipart
+# from email.mime.multipart import MIMEMultipart
 
 from private_values import *
 
@@ -39,7 +39,7 @@ class _AlertInterface:
         """
         return True
 
-    def _msg_compose(self) -> Union[str, MIMEMultipart]:
+    def _msg_compose(self) -> Union[str, 'MIMEMultipart']:
         """generate msg from existed data in attributes (passed before on init)
         """
         pass
@@ -83,6 +83,7 @@ class AlertBase(_AlertInterface, threading.Thread):     # REM: DONT ADD SINGLETO
 
     :ivar _threads_active: spawned (only active) threads
     """
+    # SETTINGS ------------------------------------
     SUBJECT_PREFIX: Optional[str] = "[ALERT]"
     SUBJECT_NAME: Optional[str] = None
     body: Optional[str] = None
@@ -97,6 +98,7 @@ class AlertBase(_AlertInterface, threading.Thread):     # REM: DONT ADD SINGLETO
 
     RECIPIENT_SPECIAL: Optional[Any] = None
 
+    # AUX -----------------------------------------
     _conn: Union[None, smtplib.SMTP_SSL, telebot.TeleBot] = None
     _result: Optional[bool] = None
 

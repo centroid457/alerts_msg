@@ -42,8 +42,12 @@ class AlertSmtp(AlertBase):
     :ivar AUTH: object with USER/PWD attributes for authorisation (see PrivateAuth/PrivateAuto for details)
     :ivar SERVER_SMTP: SmtpAddress object
     """
+    # SETTINGS ------------------------------------
     AUTH: PrivateAuth = PrivateAuto(_section="AUTH_EMAIL_DEF")
     SERVER_SMTP: SmtpAddress = SmtpServers.MAIL_RU
+
+    # AUX -----------------------------------------
+    _conn:  smtplib.SMTP_SSL
 
     def _connect_unsafe(self) -> Union[bool, NoReturn]:
         self._conn = smtplib.SMTP_SSL(self.SERVER_SMTP.ADDR, self.SERVER_SMTP.PORT, timeout=5)

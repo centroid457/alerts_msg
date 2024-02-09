@@ -18,12 +18,12 @@ class RecipientTgID(PrivateAuto):
 
 # =====================================================================================================================
 class AlertTelegram(AlertBase):
-    """realisation for sending Telegeam msg.
-
-    :ivar AUTH: object with USER/PWD attributes for authorisation
-    :ivar SERVER_SMTP: SmtpAddress object
+    """realisation for sending Telegram msg
     """
+    # SETTINGS ------------------------------------
     SERVER_TG: PrivateTgBotAddressAuto = PrivateTgBotAddressAuto(_section="TGBOT_DEF")
+
+    # AUX -----------------------------------------
     _conn: telebot.TeleBot
 
     def _connect_unsafe(self) -> Union[bool, NoReturn]:
