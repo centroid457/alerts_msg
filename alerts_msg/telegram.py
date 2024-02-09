@@ -24,12 +24,10 @@ class AlertTelegram(AlertBase):
     :ivar SERVER_SMTP: SmtpAddress object
     """
     SERVER_TG: PrivateTgBotAddressAuto = PrivateTgBotAddressAuto(_section="TGBOT_DEF")
+    _conn: telebot.TeleBot
 
     def _connect_unsafe(self) -> Union[bool, NoReturn]:
         self._conn = telebot.TeleBot(token=self.SERVER_TG.TOKEN)
-        return True
-
-    def _login_unsafe(self) -> Union[bool, NoReturn]:
         return True
 
     def _send_unsafe(self) -> Union[bool, NoReturn]:
