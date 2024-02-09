@@ -11,9 +11,13 @@ pass
 
 # =====================================================================================================================
 class HttpAddress(NamedTuple):
-    ADDR: str
-    PORT: int
-    ROUTE: str = ''
+    HOST: str
+    PORT: int = 80
+    ROUTE: str = ''     # without slashes!
+
+    def url_create(self, route: Optional[str] = None) -> str:
+        url = f"http://{self.HOST}:{self.PORT}/{self.ROUTE}"
+        return url
 
 
 class HttpServers:
@@ -32,48 +36,16 @@ class AlertHttp(AlertBase):
     SERVER_HTTP: HttpAddress = HttpServers.LIDIA
 
     # AUX -----------------------------------------
-    _conn:  'session'       # TODO: FINISH
-
-    # TODO: FINISH
-    # TODO: FINISH
-    # TODO: FINISH
-    # TODO: FINISH
-    # TODO: FINISH
-    # TODO: FINISH
-    # TODO: FINISH
-    # TODO: FINISH
-    # TODO: FINISH
-    # TODO: FINISH
-    # TODO: FINISH
-    # TODO: FINISH
-    # TODO: FINISH
-    # TODO: FINISH
-    # TODO: FINISH
-    def _connect_unsafe(self) -> Union[bool, NoReturn]:
-        """create session ???"""
-        self._conn = smtplib.SMTP_SSL(self.SERVER_SMTP.ADDR, self.SERVER_SMTP.PORT, timeout=5)
-        return True
-
-    def _login_unsafe(self) -> Union[bool, NoReturn]:
-        response = self._conn.login(self.AUTH.USER, self.AUTH.PWD)
-        print(response)
-        print("=" * 100)
-        return response and response[0] in [235, 503]
+    _conn: 'session' = True
 
     def _send_unsafe(self) -> Union[bool, NoReturn]:
-        self._conn.send_message(self._msg_compose())
+        with requests.Session() as session:
+            session.post(url=self.SERVER_HTTP.url_create(), json=self._msg_compose(), timeout=self.TIMEOUT_SEND)
         return True
 
-    def _msg_compose(self) -> MIMEMultipart:
-        msg = MIMEMultipart()
-        msg["From"] = self.AUTH.USER
-        msg["To"] = self.RECIPIENT_SPECIAL or self.AUTH.USER
-        msg['Subject'] = self.SUBJECT
-        msg.attach(MIMEText(self.body, _subtype=self._subtype))
+    def _msg_compose(self) -> Dict:
+        msg = self.body
         return msg
-
-    def _recipient_self_get(self) -> str:
-        return self.AUTH.USER
 
 
 # =====================================================================================================================

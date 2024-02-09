@@ -47,11 +47,17 @@ class Test:
         thread1 = victim("thread1")
         thread2 = victim("thread2")
 
-        thread1.join()
-        thread2.join()
+        thread1.wait()
+        thread2.wait()
 
         assert thread1._result is True
         assert thread2._result is True
+
+
+# =====================================================================================================================
+class Test_HTTP:
+    def test__send_single(self, victim):
+        assert victim("single").result_wait() is True
 
 
 # =====================================================================================================================

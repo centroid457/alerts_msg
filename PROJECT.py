@@ -49,7 +49,8 @@ designed for ...
     ]
     NEWS: List[str] = [
         "apply new pypi template/2",
-        "ref to QThread! so able to use multy start!"
+        "ref to QThread! so able to use multy start!",
+        "add TIMEOUT_SEND"
     ]
 
     # FINALIZE -----------------------------------------------

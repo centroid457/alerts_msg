@@ -42,12 +42,13 @@ class AlertSmtp(AlertBase):
     # SETTINGS ------------------------------------
     SERVER_SMTP: SmtpAddress = SmtpServers.MAIL_RU
     AUTH: PrivateAuth = PrivateAuto(_section="AUTH_EMAIL_DEF")
+    TIMEOUT_SEND = 5
 
     # AUX -----------------------------------------
     _conn:  smtplib.SMTP_SSL
 
     def _connect_unsafe(self) -> Union[bool, NoReturn]:
-        self._conn = smtplib.SMTP_SSL(self.SERVER_SMTP.ADDR, self.SERVER_SMTP.PORT, timeout=5)
+        self._conn = smtplib.SMTP_SSL(self.SERVER_SMTP.ADDR, self.SERVER_SMTP.PORT, timeout=self.TIMEOUT_SEND)
         return True
 
     def _login_unsafe(self) -> Union[bool, NoReturn]:

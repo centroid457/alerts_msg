@@ -85,11 +85,13 @@ class AlertBase(_AlertInterface, QThread):     # REM: DONT ADD SINGLETON!!! SNMP
     # SETTINGS ------------------------------------
     SUBJECT_PREFIX: Optional[str] = "[ALERT]"
     SUBJECT_NAME: Optional[str] = None
-    body: Optional[str] = None
+    body: Union[None, str, dict] = None
     _subtype: Optional[str] = "plain"
 
     BODY_TIMESTAMP_USE: bool = True
     TIMESTAMP: str = None
+
+    TIMEOUT_SEND: float = 1.2
 
     RECONNECT_LIMIT: int = 10
     RECONNECT_PAUSE: int = 60
@@ -170,7 +172,7 @@ class AlertBase(_AlertInterface, QThread):     # REM: DONT ADD SINGLETON!!! SNMP
         try:
             time.sleep(1)
             while cls._threads_active:
-                list(cls._threads_active)[0].join()
+                list(cls._threads_active)[0].wait()
         except:
             pass
 
@@ -178,7 +180,7 @@ class AlertBase(_AlertInterface, QThread):     # REM: DONT ADD SINGLETON!!! SNMP
         """wait for finish thread and get succession result.
         Created for tests mainly! but you can use!
         """
-        self.join()
+        self.wait()
         return self._result
 
     # =================================================================================================================
