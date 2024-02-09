@@ -42,10 +42,10 @@ designed for ...
     # HISTORY -----------------------------------------------
     VERSION: Tuple[int, int, int] = (0, 2, 1)
     TODO: List[str] = [
-        "test multyStart by one object"
+        "test multyStart by one object (QThread)"
     ]
     FIXME: List[str] = [
-        "..."
+        "NEED SOLVE ABILITY to work without PV.FILE!!! as just a http client"
     ]
     NEWS: List[str] = [
         "apply new pypi template/2",

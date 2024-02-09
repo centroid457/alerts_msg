@@ -2,7 +2,6 @@ import os
 import pytest
 import pathlib
 import shutil
-from tempfile import TemporaryDirectory
 from typing import *
 
 from alerts_msg import *
@@ -55,9 +54,10 @@ class Test:
 
 
 # =====================================================================================================================
-class Test_HTTP:
+class Test_AlertHttp:
+    Victim = AlertHttp
     def test__send_single(self, victim):
-        assert victim("single").result_wait() is True
+        assert self.Victim({}).result_wait() is True
 
 
 # =====================================================================================================================
