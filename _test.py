@@ -4,7 +4,6 @@ import pathlib
 import shutil
 from tempfile import TemporaryDirectory
 from typing import *
-import threading
 
 from alerts_msg import *
 

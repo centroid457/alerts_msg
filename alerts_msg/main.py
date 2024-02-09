@@ -1,6 +1,5 @@
 import time
 from typing import *
-import abc
 
 import threading
 
@@ -12,11 +11,11 @@ from private_values import *
 
 
 # =====================================================================================================================
-# TODO: need rebuild README!!!
+pass
 
 
 # =====================================================================================================================
-class _AlertInterface(abc.ABC):
+class _AlertInterface:
     """Interface for Alerts
 
     RULES:
@@ -25,34 +24,27 @@ class _AlertInterface(abc.ABC):
     - Dont use Try sentences inside - it will be applied in upper logic!
     - Decide inside if it was success or not, and return conclusion True/False only.
     """
-    @abc.abstractmethod
     def _connect_unsafe(self) -> Union[bool, NoReturn]:
         """establish connection to source
         """
-        pass
+        return True
 
-    @abc.abstractmethod
     def _login_unsafe(self) -> Union[bool, NoReturn]:
         """authorise to source
         """
-        pass
+        return True
 
-    @abc.abstractmethod
     def _send_unsafe(self) -> Union[bool, NoReturn]:
         """send msg
         """
-        pass
+        return True
 
-    @property
-    @abc.abstractmethod
-    def MSG(self) -> Union[str, MIMEMultipart]:
+    def _msg_compose(self) -> Union[str, MIMEMultipart]:
         """generate msg from existed data in attributes (passed before on init)
         """
         pass
 
-    @property
-    @abc.abstractmethod
-    def RECIPIENT_SELF(self) -> str:
+    def _recipient_self_get(self) -> str:
         """RECIPIENT SelfSending, get from obvious class objects!
         """
         pass
@@ -136,11 +128,10 @@ class AlertBase(_AlertInterface, threading.Thread):     # REM: DONT ADD SINGLETO
             self.start()
 
     # =================================================================================================================
-    @property
     def RECIPIENT(self) -> str:
         """RECIPIENT actual/final
         """
-        return self.RECIPIENT_SPECIAL or self.RECIPIENT_SELF
+        return self.RECIPIENT_SPECIAL or self._recipient_self_get()
 
     @property
     def SUBJECT(self) -> str:
@@ -251,7 +242,7 @@ class AlertBase(_AlertInterface, threading.Thread):     # REM: DONT ADD SINGLETO
                 time.sleep(self.RECONNECT_PAUSE)
 
         print("[Try send", "-" * 80)
-        print(self.MSG)
+        print(self._msg_compose())
         print("Try send]", "-" * 80)
 
         if self._conn__check_exists():

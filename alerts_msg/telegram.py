@@ -33,16 +33,14 @@ class AlertTelegram(AlertBase):
         return True
 
     def _send_unsafe(self) -> Union[bool, NoReturn]:
-        self._conn.send_message(chat_id=self.RECIPIENT, text=self.MSG)
+        self._conn.send_message(chat_id=self.RECIPIENT, text=self._msg_compose())
         return True
 
-    @property
-    def MSG(self) -> str:
+    def _msg_compose(self) -> str:
         msg = f"{self.SUBJECT}\n{self.body}"
         return msg
 
-    @property
-    def RECIPIENT_SELF(self) -> str:
+    def _recipient_self_get(self) -> str:
         return RecipientTgID().MyTgID
 
 

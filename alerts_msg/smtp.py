@@ -56,11 +56,10 @@ class AlertSmtp(AlertBase):
         return response and response[0] in [235, 503]
 
     def _send_unsafe(self) -> Union[bool, NoReturn]:
-        self._conn.send_message(self.MSG)
+        self._conn.send_message(self._msg_compose())
         return True
 
-    @property
-    def MSG(self) -> MIMEMultipart:
+    def _msg_compose(self) -> MIMEMultipart:
         msg = MIMEMultipart()
         msg["From"] = self.AUTH.USER
         msg["To"] = self.RECIPIENT_SPECIAL or self.AUTH.USER
@@ -68,8 +67,7 @@ class AlertSmtp(AlertBase):
         msg.attach(MIMEText(self.body, _subtype=self._subtype))
         return msg
 
-    @property
-    def RECIPIENT_SELF(self) -> str:
+    def _recipient_self_get(self) -> str:
         return self.AUTH.USER
 
 
