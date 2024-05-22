@@ -1,23 +1,74 @@
-# virtual env python
+# ==========================
+# VERSION = (0, 0, 1)#use build as broadcast/nested
+# VERSION = (0, 0, 2)#add BACKUPS + start HELP
+# VERSION = (0, 0, 3)#add DrawIo *.dtmp
+# VERSION = (0, 0, 4)#add LOGS
+# VERSION = (0, 0, 5)#add LOG.* for RotatingFileHandler
+
+# HELP ---------------------
+# 1=NESTING
+# (*.xyz) or the same (**/*.xyz) - files in any nested directory!
+# (*xyz/) or the same (**/*xyz/) same as for directories
+# 2=CaseInsensitive!
+# (HELP) same as (help)!!! may be exists some flag for it!
+# 3=SLASH_ENDS not need but if used applyed only for directories!
+# (*xyz) - both for directories and files
+# (*xyz/) - only for directories
+
+# PYTHON ===================
+# virtual env --------------
 .venv/
 venv/
 env/
 
-# byte-compiled
-**/__pycache__/
-**/*.py[cod]
+# byte-compiled ------------
+__pycache__/
+*.py[cod]
 
-# pycharm
+# IDE ----------------------
 .idea/
+.vscode/
 
-# PYTEST
-**/.pytest_cache/
+# PYTEST -------------------
+.pytest_cache/
 
-# TEMP
+# PYPI DISTRIBUTION --------
+build/
+_build/
+dist/
+
+*.egg-info/
+
+# documentation ------------
+#documentation/build/*
+#documentation/source/_build/*
+
+# BACKUPS ------------------
+*.bkp
+
+# LOGS ---------------------
+*.log
+*.log.*
+
+# some other ---------------
+htmlcov/
+.coverage
+*~lock*
+manage.sh
+todo.org
+*.orig
+
+# USER =====================
+# TEMP ---------------------
 TEMPORARY/
 -*
+# DrawIo
+*.dtmp
 
-# DISTRIBUTION
-build/
-dist/
-*.egg-info/
+# user saved data ----------
+USERDATA/
+
+# ========================================
+# SPECIAL FOR THIS PROJECT ---------------
+
+# ========================================

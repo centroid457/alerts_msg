@@ -40,7 +40,7 @@ designed for ...
     ]
 
     # HISTORY -----------------------------------------------
-    VERSION: Tuple[int, int, int] = (0, 2, 1)
+    VERSION: Tuple[int, int, int] = (0, 2, 2)
     TODO: List[str] = [
         "test multyStart by one object (QThread)"
     ]
@@ -48,9 +48,8 @@ designed for ...
         "NEED SOLVE ABILITY to work without PV.FILE!!! as just a http client"
     ]
     NEWS: List[str] = [
-        "apply new pypi template/2",
-        "ref to QThread! so able to use multy start!",
-        "add TIMEOUT_SEND"
+        "[__INIT__.py] fix import",
+        "apply last pypi template",
     ]
 
     # FINALIZE -----------------------------------------------

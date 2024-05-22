@@ -1,4 +1,4 @@
-# alerts_msg (v0.2.1)
+# alerts_msg (v0.2.2)
 
 ## DESCRIPTION_SHORT
 All abilities (mail/telegram) to send alert msgs (threading)

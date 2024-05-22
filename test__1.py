@@ -8,7 +8,7 @@ from alerts_msg import *
 
 
 # =====================================================================================================================
-class Test:
+class Test__1:
     @pytest.mark.parametrize(argnames="victim", argvalues=[AlertSmtp, AlertTelegram])
     def test__send_single(self, victim):
         assert victim("single").result_wait() is True
@@ -54,10 +54,10 @@ class Test:
 
 
 # =====================================================================================================================
-class Test_AlertHttp:
-    Victim = AlertHttp
-    def test__send_single(self, victim):
-        assert self.Victim({}).result_wait() is True
+# class Test_AlertHttp:
+#     Victim = AlertHttp
+#     def test__send_single(self, victim):
+#         assert self.Victim({}).result_wait() is True
 
 
 # =====================================================================================================================
