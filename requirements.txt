@@ -5,18 +5,9 @@
 # VERSION = (0, 0, 4)   # add logger-aux
 
 # COMMON ===================
-pytest
-requirements-checker
-object-info
-funcs-aux
-logger-aux
 
 # ========================================
 # SPECIAL FOR THIS PROJECT - ROOT --------
-PyQt5
-telebot
-private-values
-requests
 
 # NESTED ---------------------------------
 
